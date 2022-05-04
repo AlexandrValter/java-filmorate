@@ -1,4 +1,5 @@
 # java-filmorate
+<<<<<<< HEAD
 
 ### ER-диаграмма: 
 
@@ -43,3 +44,6 @@ WHERE f.ID IN (SELECT ID_FILM FROM DIRECTORS_FILMS_LINK WHERE ID_DIRECTOR=?
 GROUP BY f.id ORDER BY COUNT(l.user_id) DESC
 
 
+=======
+Template repository for Filmorate project.
+>>>>>>> 1300c36 (Initial commit)
