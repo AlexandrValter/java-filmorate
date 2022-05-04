@@ -1,62 +1,85 @@
 package ru.yandex.practicum.filmorate.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
 
-import javax.validation.Valid;
-import java.util.Collection;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final UserService userService;
-
-    @Autowired
-    public UserController(@Qualifier("UserDbService") UserService userService) {
-        this.userService = userService;
-    }
+    private final Map<Integer, User> users = new HashMap<>();
+    private Integer id;
 
     @PostMapping
-    public User addUser(@Valid @RequestBody User user) {
-        return userService.addUser(user);
+    public void addUser(@RequestBody User user) {
+        if (validateUser(user)) {
+            setName(user);
+            user.setId(makeId());
+            users.put(user.getId(), user);
+        }
     }
 
     @GetMapping
-    public Collection<User> getUsers() {
-        return userService.getAllUsers();
+    public Map<Integer, User> getUsers() {
+        return users;
     }
 
     @PutMapping
-    public User addOrUpdateUser(@Valid @RequestBody User user) {
-        return userService.addOrUpdateUser(user);
+    public void addOrUpdateUser(@RequestBody User user) {
+        if (validateUser(user)) {
+            if (user.getId() != null) {
+                if (users.containsKey(user.getId())) {
+                    setName(user);
+                    users.put(user.getId(), user);
+                }
+            } else {
+                setName(user);
+                user.setId(makeId());
+                users.put(user.getId(), user);
+            }
+        }
     }
 
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable int id) {
-        return userService.getUser(id);
+    @PatchMapping
+    public void updateUser(@RequestBody User user) {
+        if (validateUser(user)) {
+            if (users.containsKey(user.getId())) {
+                setName(user);
+                users.put(user.getId(), user);
+            }
+        }
     }
 
-    @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
-        userService.addFriends(id, friendId);
+    private Integer makeId() {
+        if (id == null) {
+            id = 1;
+        } else {
+            id++;
+        }
+        return id;
     }
 
-    @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
-        userService.deleteFriends(id, friendId);
+    private boolean validateUser(User user) {
+        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            throw new ValidationException("Веденный e-mail некорректен");
+        } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+            throw new ValidationException("Проверьте введеный логин, он не должен содержать пробелы");
+        } else if (user.getBirthday().isAfter(LocalDate.now())) {
+            throw new ValidationException("Введена неверная дата рождения");
+        } else {
+            return true;
+        }
     }
 
-    @GetMapping("/{id}/friends")
-    public List<User> getFriends(@PathVariable int id) {
-        return userService.getFriends(id);
-    }
-
-    @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
-        return userService.getCommonFriends(id, otherId);
+    private void setName(User user) {
+        if (user.getName() == null) {
+            user.setName(user.getLogin());
+        } else if (user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
     }
 }
