@@ -11,7 +11,9 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FilmControllerTest {
+
     private FilmController controller;
+
 
     @BeforeEach
     public void createController() {
@@ -35,30 +37,8 @@ public class FilmControllerTest {
         assertTrue(controller.getFilms().isEmpty());
         assertThrows(
                 ValidationException.class,
-                () -> controller.addFilm(new Film("", "Описание фильма 1",
-                        LocalDate.of(1990, 01, 01), Duration.ofHours(2)))
-        );
-        assertThrows(
-                ValidationException.class,
-                () -> controller.addFilm(new Film("Фильм1", "Описание этого фильма состоит из двухсот " +
-                        "одного символа – при которой появляется ошибка согласно требованиям технического задания и " +
-                        "фильм не добавляется в базу. Немного не хватило до двухсот одного 201",
-                        LocalDate.of(1990, 01, 01), Duration.ofHours(2)))
-        );
-        assertThrows(
-                ValidationException.class,
                 () -> controller.addFilm(new Film("Фильм 1", "Описание фильма 1",
                         LocalDate.of(1895, 12, 27), Duration.ofHours(2)))
-        );
-        assertThrows(
-                ValidationException.class,
-                () -> controller.addFilm(new Film("Фильм 1", "",
-                        LocalDate.of(1995, 12, 27), Duration.ofHours(2)))
-        );
-        assertThrows(
-                ValidationException.class,
-                () -> controller.addFilm(new Film("Фильм 1", "Описание фильма 1",
-                        LocalDate.of(1995, 12, 27), Duration.ofHours(-1)))
         );
         assertTrue(controller.getFilms().isEmpty());
     }

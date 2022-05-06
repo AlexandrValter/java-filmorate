@@ -2,10 +2,9 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,15 +16,12 @@ public class UserController {
     private Integer id;
 
     @PostMapping
-    public User addUser(@RequestBody User user) {
-        if (validateUser(user)) {
-            setName(user);
-            user.setId(makeId());
-            users.put(user.getId(), user);
-            log.info("Добавлен новый пользователь {}, id={}", user.getName(), user.getId());
-            return user;
-        }
-        return null;
+    public User addUser(@Valid @RequestBody User user) {
+        setName(user);
+        user.setId(makeId());
+        users.put(user.getId(), user);
+        log.info("Добавлен новый пользователь {}, id={}", user.getName(), user.getId());
+        return user;
     }
 
     @GetMapping
@@ -34,31 +30,27 @@ public class UserController {
     }
 
     @PutMapping
-    public void addOrUpdateUser(@RequestBody User user) {
-        if (validateUser(user)) {
-            if (user.getId() != null) {
-                if (users.containsKey(user.getId())) {
-                    setName(user);
-                    users.put(user.getId(), user);
-                    log.info("Обновлена информация о пользователе {}, id={}", user.getName(), user.getId());
-                }
-            } else {
-                setName(user);
-                user.setId(makeId());
-                users.put(user.getId(), user);
-                log.info("Добавлен новый пользователь {}, id={}", user.getName(), user.getId());
-            }
-        }
-    }
-
-    @PatchMapping
-    public void updateUser(@RequestBody User user) {
-        if (validateUser(user)) {
+    public void addOrUpdateUser(@Valid @RequestBody User user) {
+        if (user.getId() != null) {
             if (users.containsKey(user.getId())) {
                 setName(user);
                 users.put(user.getId(), user);
                 log.info("Обновлена информация о пользователе {}, id={}", user.getName(), user.getId());
             }
+        } else {
+            setName(user);
+            user.setId(makeId());
+            users.put(user.getId(), user);
+            log.info("Добавлен новый пользователь {}, id={}", user.getName(), user.getId());
+        }
+    }
+
+    @PatchMapping
+    public void updateUser(@Valid @RequestBody User user) {
+        if (users.containsKey(user.getId())) {
+            setName(user);
+            users.put(user.getId(), user);
+            log.info("Обновлена информация о пользователе {}, id={}", user.getName(), user.getId());
         }
     }
 
@@ -69,21 +61,6 @@ public class UserController {
             id++;
         }
         return id;
-    }
-
-    private boolean validateUser(User user) {
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.error("Введен некорректный e-mail");
-            throw new ValidationException("Веденный e-mail некорректен");
-        } else if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.error("Введен некорректный login");
-            throw new ValidationException("Проверьте введеный логин, он не должен содержать пробелы");
-        } else if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Введена неверная дата рождения");
-            throw new ValidationException("Введена неверная дата рождения");
-        } else {
-            return true;
-        }
     }
 
     private void setName(User user) {
