@@ -1,17 +1,12 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -32,21 +27,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getFilmsByDirector(Integer id, String param) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @Override
-    public Collection<Film> getAllFilms() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @Override
-    public List<Film> getPopularFilms(int count) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @Override
     public Map<Integer, Film> getFilms() {
         return films;
     }
@@ -59,10 +39,8 @@ public class InMemoryFilmStorage implements FilmStorage {
                     films.put(film.getId(), film);
                     log.info("Обновлена информация о фильме {}, id={}", film.getName(), film.getId());
                     return film;
-                } else {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            String.format("Фильм с id %d не найден", film.getId()));
                 }
+                return null;
             } else {
                 film.setId(makeId());
                 films.put(film.getId(), film);
@@ -77,10 +55,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film getFilm(int id) {
         if (films.containsKey(id)) {
             return films.get(id);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Фильм с id %d не найден", id));
         }
+        return null;
     }
 
     private boolean validateFilm(Film film) {

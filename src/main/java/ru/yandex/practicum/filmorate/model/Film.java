@@ -1,15 +1,22 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.validator.constraints.time.DurationMin;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
+    private Set<Integer> likes = new HashSet<>();
+    @JsonIgnore
+    private int countLikes;
     private Integer id;
     @NotBlank(message = "Название не должно быть пустым")
     private final String name;
