@@ -1,9 +1,12 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,10 +27,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Map<Integer, User> getUsers() {
-        return users;
+    public Collection<User> getAllUsers() {
+        return users.values();
     }
-
 
     @Override
     public User addOrUpdateUser(User user) {
@@ -37,8 +39,10 @@ public class InMemoryUserStorage implements UserStorage {
                 users.put(user.getId(), user);
                 log.info("Обновлена информация о пользователе {}, id={}", user.getName(), user.getId());
                 return user;
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        String.format("Пользователь с id %d не найден", user.getId()));
             }
-            return null;
         } else {
             setName(user);
             user.setId(makeId());
@@ -49,11 +53,17 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUser(int id){
+    public User getUser(int id) {
         if (users.containsKey(id)) {
             return users.get(id);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("Пользователь с id %d не найден", id));
         }
-        return null;
+    }
+
+    public Map<Integer, User> getUsers() {
+        return users;
     }
 
     @Override
