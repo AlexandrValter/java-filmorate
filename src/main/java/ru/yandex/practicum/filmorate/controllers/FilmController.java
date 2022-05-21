@@ -8,8 +8,8 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import javax.validation.Valid;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
@@ -29,8 +29,8 @@ public class FilmController {
     }
 
     @GetMapping
-    public Map<Integer, Film> getFilms() {
-        return filmStorage.getFilms();
+    public Collection<Film> getFilms() {
+        return filmStorage.getAllFilms();
     }
 
     @PutMapping
@@ -49,12 +49,12 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(@PathVariable int id, @PathVariable int userId){
+    public void deleteLike(@PathVariable int id, @PathVariable int userId) {
         filmService.deleteLike(id, userId);
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms (@RequestParam (defaultValue = "10") int count){
-        return filmService.getPopularFilms(count);
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
+        return filmService.popularFilms(count);
     }
 }
