@@ -44,10 +44,7 @@ public class InMemoryUserStorage implements UserStorage {
                         String.format("Пользователь с id %d не найден", user.getId()));
             }
         } else {
-            setName(user);
-            user.setId(makeId());
-            users.put(user.getId(), user);
-            log.info("Добавлен новый пользователь {}, id={}", user.getName(), user.getId());
+            addUser(user);
             return user;
         }
     }
