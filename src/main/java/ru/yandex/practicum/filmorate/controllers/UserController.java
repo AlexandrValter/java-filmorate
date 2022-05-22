@@ -1,75 +1,65 @@
 package ru.yandex.practicum.filmorate.controllers;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private Integer id;
+    private final UserStorage userStorage;
+    private final UserService userService;
+
+    @Autowired
+    public UserController(InMemoryUserStorage userStorage, UserService userService) {
+        this.userStorage = userStorage;
+        this.userService = userService;
+    }
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-        setName(user);
-        user.setId(makeId());
-        users.put(user.getId(), user);
-        log.info("Добавлен новый пользователь {}, id={}", user.getName(), user.getId());
-        return user;
+        return userStorage.addUser(user);
     }
 
     @GetMapping
-    public Map<Integer, User> getUsers() {
-        return users;
+    public Collection<User> getUsers() {
+        return userStorage.getAllUsers();
     }
 
     @PutMapping
-    public void addOrUpdateUser(@Valid @RequestBody User user) {
-        if (user.getId() != null) {
-            if (users.containsKey(user.getId())) {
-                setName(user);
-                users.put(user.getId(), user);
-                log.info("Обновлена информация о пользователе {}, id={}", user.getName(), user.getId());
-            }
-        } else {
-            setName(user);
-            user.setId(makeId());
-            users.put(user.getId(), user);
-            log.info("Добавлен новый пользователь {}, id={}", user.getName(), user.getId());
-        }
+    public User addOrUpdateUser(@Valid @RequestBody User user) {
+        return userStorage.addOrUpdateUser(user);
     }
 
-    @PatchMapping
-    public void updateUser(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
-            setName(user);
-            users.put(user.getId(), user);
-            log.info("Обновлена информация о пользователе {}, id={}", user.getName(), user.getId());
-        }
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable int id) {
+        return userStorage.getUser(id);
     }
 
-    private Integer makeId() {
-        if (id == null) {
-            id = 1;
-        } else {
-            id++;
-        }
-        return id;
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.addFriends(id, friendId);
     }
 
-    private void setName(User user) {
-        if (user.getName() == null) {
-            log.warn("Имя не введено");
-            user.setName(user.getLogin());
-        } else if (user.getName().isBlank()) {
-            log.warn("Введено пустое имя");
-            user.setName(user.getLogin());
-        }
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.deleteFriends(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable int id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 }
