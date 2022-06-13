@@ -25,4 +25,12 @@ public class Film {
     private final LocalDate releaseDate;
     @Min(0)
     private final Integer duration;
+
+    public Film(Integer id, String name, String description, LocalDate releaseDate, Integer duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+    }
 }
