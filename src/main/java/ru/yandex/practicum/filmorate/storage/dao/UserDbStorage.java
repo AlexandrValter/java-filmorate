@@ -1,11 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -40,32 +39,37 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getAllUsers() {
-        String sql = "SELECT * FROM users;";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new User(
+        String sql = "SELECT * FROM users";
+        Collection<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> new User(
                 rs.getInt("id"),
                 rs.getString("login"),
                 rs.getString("email"),
                 rs.getString("name"),
                 LocalDate.parse(rs.getString("birthday")))
         );
+        return users;
     }
 
     @Override
     public User addOrUpdateUser(User user) {
-        String sql = "MERGE INTO users (id, login, email, name, birthday) " +
-                "KEY (id) VALUES (?, ?, ?, ?, ?);";
-        jdbcTemplate.update(sql,
-                user.getId(),
-                user.getLogin(),
-                user.getEmail(),
-                user.getName(),
-                user.getBirthday());
+        if (user.getId() != null) {
+            String sql = "MERGE INTO users (id, login, email, name, birthday) " +
+                    "KEY (id) VALUES (?, ?, ?, ?, ?)";
+            jdbcTemplate.update(sql,
+                    user.getId(),
+                    user.getLogin(),
+                    user.getEmail(),
+                    user.getName(),
+                    user.getBirthday());
+        } else {
+            addUser(user);
+        }
         return user;
     }
 
     @Override
     public User getUser(int id) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE id = ?;", id);
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE id = ?", id);
         if (userRows.next()) {
             return new User(
                     userRows.getInt("id"),
@@ -74,13 +78,12 @@ public class UserDbStorage implements UserStorage {
                     userRows.getString("name"),
                     LocalDate.parse(userRows.getString("birthday")));
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Пользователь с id %d не найден", id));
+            return null;
         }
     }
 
     @Override
     public Map<Integer, User> getUsers() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        return null;
     }
 }
