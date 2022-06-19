@@ -38,7 +38,7 @@ public class UserDbService implements UserService {
             if (!friendRows.next()) {
                 doNotBilateral(userId, friendId);
             } else {
-                String sql = "MERGE INTO friendship KEY(from_user_id, to_user_id) VALUES (?, ?, ?)";
+                String sql = "MERGE INTO friendship KEY(from_user_id, to_user_id) VALUES (?, ?, ?);";
                 jdbcTemplate.update(sql, userId, friendId, true);
                 jdbcTemplate.update(sql, friendId, userId, true);
             }
@@ -59,7 +59,7 @@ public class UserDbService implements UserService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                         String.format("У пользователя с id %d нет в друзьях пользователя с id %d", userId, friendId));
             }
-            String sql = "DELETE FROM friendship WHERE from_user_id = ? AND to_user_id = ?";
+            String sql = "DELETE FROM friendship WHERE from_user_id = ? AND to_user_id = ?;";
             jdbcTemplate.update(sql, userId, friendId);
             if (friendship.isBilateral()) {
                 doNotBilateral(friendId, userId);
@@ -73,7 +73,7 @@ public class UserDbService implements UserService {
             String sql = "SELECT fr.to_user_id, u.login, u.email, u.name, u.birthday " +
                     "FROM users AS u " +
                     "RIGHT OUTER JOIN friendship AS fr ON fr.to_user_id = u.id " +
-                    "WHERE fr.from_user_id = ?";
+                    "WHERE fr.from_user_id = ?;";
             Collection<User> users = jdbcTemplate.query(sql, this::makeUser, userId);
             return List.copyOf(users);
         }
@@ -96,14 +96,16 @@ public class UserDbService implements UserService {
     }
 
     private void doNotBilateral(int userId, int friendId) {
-        String sql = "MERGE INTO friendship KEY(from_user_id, to_user_id) VALUES (?, ?, ?)";
+        String sql = "MERGE INTO friendship KEY(from_user_id, to_user_id) VALUES (?, ?, ?);";
         jdbcTemplate.update(sql, userId, friendId, false);
     }
 
     private SqlRowSet getFriendship(int userId, int friendId) {
-        return jdbcTemplate.queryForRowSet("SELECT * " +
+        return jdbcTemplate.queryForRowSet(
+                "SELECT * " +
                 "FROM friendship " +
-                "WHERE from_user_id = ? AND to_user_id = ?", userId, friendId);
+                "WHERE from_user_id = ? AND to_user_id = ?;",
+                userId, friendId);
     }
 
     private User makeUser(ResultSet rs, int rowNum){
