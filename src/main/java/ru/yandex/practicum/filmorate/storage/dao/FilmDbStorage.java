@@ -52,7 +52,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film addOrUpdateFilm(Film film) {
         if (film.getId() != null && getFilm(film.getId()) != null) {
             String sqlMerge = "MERGE INTO films (id, name, description, release_date, duration, id_mpa) " +
-                    "KEY (id) VALUES (?, ?, ?, ?, ?, ?)";
+                    "KEY (id) VALUES (?, ?, ?, ?, ?, ?);";
             jdbcTemplate.update(sqlMerge,
                     film.getId(),
                     film.getName(),
@@ -60,7 +60,7 @@ public class FilmDbStorage implements FilmStorage {
                     film.getReleaseDate(),
                     film.getDuration(),
                     film.getMpa().getId());
-            String sqlDel = "DELETE FROM film_genre WHERE film_id = ?";
+            String sqlDel = "DELETE FROM film_genre WHERE film_id = ?;";
             jdbcTemplate.update(sqlDel, film.getId());
             fillingGenres(film);
         } else {
@@ -113,7 +113,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT fg.genre_id, g.name " +
                 "FROM film_genre AS fg " +
                 "LEFT OUTER JOIN genres AS g ON fg.genre_id = g.genre_id " +
-                "WHERE fg.film_id=?";
+                "WHERE fg.film_id=?;";
         List<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) ->
                 new Genre(rs.getInt("genre_id"), rs.getString("name")), id);
         if (!genres.isEmpty()) {

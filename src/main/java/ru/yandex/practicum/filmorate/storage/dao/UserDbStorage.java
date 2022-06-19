@@ -41,7 +41,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getAllUsers() {
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM users;";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new User(
                 rs.getInt("id"),
                 rs.getString("login"),
@@ -56,7 +56,7 @@ public class UserDbStorage implements UserStorage {
         if ((user.getId() != null) && (getUser(user.getId()) != null)) {
             user.setName(user.getName());
             String sql = "MERGE INTO users (id, login, email, name, birthday) " +
-                    "KEY (id) VALUES (?, ?, ?, ?, ?)";
+                    "KEY (id) VALUES (?, ?, ?, ?, ?);";
             jdbcTemplate.update(sql,
                     user.getId(),
                     user.getLogin(),
@@ -71,7 +71,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUser(int id) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE id = ?", id);
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE id = ?;", id);
         if (userRows.next()) {
             return new User(
                     userRows.getInt("id"),
