@@ -22,10 +22,11 @@ public class MpaDaoImpl implements MpaDao {
     @Override
     public List<Mpa> getAllMpa() {
         String sql = "SELECT * FROM mpa_rating;";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Mpa(
+        List<Mpa> mpa = jdbcTemplate.query(sql, (rs, rowNum) -> new Mpa(
                 rs.getInt("id_mpa_rating"),
                 rs.getString("meaning_mpa"))
         );
+        return mpa;
     }
 
     @Override
@@ -33,10 +34,11 @@ public class MpaDaoImpl implements MpaDao {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
                 "SELECT * FROM mpa_rating WHERE id_mpa_rating=?;", id);
         if (mpaRows.next()) {
-            return new Mpa(
+            Mpa mpa = new Mpa(
                     mpaRows.getInt("id_mpa_rating"),
                     mpaRows.getString("meaning_mpa")
             );
+            return mpa;
         } else {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,

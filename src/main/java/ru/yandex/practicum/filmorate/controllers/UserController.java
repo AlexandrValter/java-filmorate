@@ -18,7 +18,8 @@ public class UserController {
     private final UserService userService;
 
     @Autowired
-    public UserController(@Qualifier("UserDbStorage") UserStorage userStorage, UserService userService) {
+    public UserController(@Qualifier("UserDbStorage") UserStorage userStorage,
+                          @Qualifier("UserDbService") UserService userService) {
         this.userStorage = userStorage;
         this.userService = userService;
     }

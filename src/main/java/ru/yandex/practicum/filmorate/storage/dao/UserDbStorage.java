@@ -1,10 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -24,6 +25,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
+        user.setName(user.getName());
         Map<String, Object> keys = new SimpleJdbcInsert(this.jdbcTemplate)
                 .withTableName("users")
                 .usingColumns("login", "email", "name", "birthday")
@@ -40,19 +42,19 @@ public class UserDbStorage implements UserStorage {
     @Override
     public Collection<User> getAllUsers() {
         String sql = "SELECT * FROM users";
-        Collection<User> users = jdbcTemplate.query(sql, (rs, rowNum) -> new User(
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new User(
                 rs.getInt("id"),
                 rs.getString("login"),
                 rs.getString("email"),
                 rs.getString("name"),
                 LocalDate.parse(rs.getString("birthday")))
         );
-        return users;
     }
 
     @Override
     public User addOrUpdateUser(User user) {
-        if (user.getId() != null) {
+        if ((user.getId() != null) && (getUser(user.getId()) != null)) {
+            user.setName(user.getName());
             String sql = "MERGE INTO users (id, login, email, name, birthday) " +
                     "KEY (id) VALUES (?, ?, ?, ?, ?)";
             jdbcTemplate.update(sql,
@@ -78,12 +80,17 @@ public class UserDbStorage implements UserStorage {
                     userRows.getString("name"),
                     LocalDate.parse(userRows.getString("birthday")));
         } else {
-            return null;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("Пользователь с id %d не найден", id));
         }
     }
 
     @Override
     public Map<Integer, User> getUsers() {
-        return null;
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public void setName(User user) {
     }
 }

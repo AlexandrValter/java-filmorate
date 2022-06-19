@@ -63,7 +63,7 @@ public class InMemoryUserStorage implements UserStorage {
         return users;
     }
 
-    private void setName(User user) {
+    public void setName(User user) {
         if (user.getName() == null) {
             log.warn("Имя не введено");
             user.setName(user.getLogin());

@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.GenreDao;
 
 import java.util.List;
@@ -19,23 +20,27 @@ public class GenreDaoImpl implements GenreDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+
     @Override
     public List<Genre> getAllGenres() {
         String sql = "SELECT * FROM genres;";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new Genre(
+        List<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) -> new Genre(
                 rs.getInt("genre_id"),
                 rs.getString("name"))
         );
+        return genres;
     }
 
     @Override
     public Genre getGenre(int id) {
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet("SELECT * FROM genres WHERE genre_id=?;", id);
+        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(
+                "SELECT * FROM genres WHERE genre_id=?;", id);
         if (genreRows.next()) {
-            return new Genre(
+            Genre genre = new Genre(
                     genreRows.getInt("genre_id"),
                     genreRows.getString("name")
             );
+            return genre;
         } else {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
