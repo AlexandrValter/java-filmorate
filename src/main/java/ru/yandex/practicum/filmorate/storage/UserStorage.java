@@ -16,4 +16,6 @@ public interface UserStorage {
     User getUser(int id);
 
     Map<Integer, User> getUsers();
+
+    void setName(User user);
 }

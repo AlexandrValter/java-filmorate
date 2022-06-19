@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -32,7 +33,12 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAllFilms() {
-        return films.values();
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> getPopularFilms(int count) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Override
