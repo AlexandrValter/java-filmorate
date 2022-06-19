@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -24,26 +23,6 @@ public class InMemoryUserService implements UserService{
     @Autowired
     public InMemoryUserService(@Qualifier("inMemoryUserStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
-    }
-
-    @Override
-    public User addUser(User user) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @Override
-    public Collection<User> getAllUsers() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @Override
-    public User addOrUpdateUser(User user) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @Override
-    public User getUser(int id) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     public void addFriends(int userId, int friendId) {
