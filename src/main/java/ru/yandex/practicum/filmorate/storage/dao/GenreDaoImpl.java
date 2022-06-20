@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -11,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.GenreDao;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class GenreDaoImpl implements GenreDao {
 
@@ -28,6 +30,7 @@ public class GenreDaoImpl implements GenreDao {
                 rs.getInt("genre_id"),
                 rs.getString("name"))
         );
+        log.info("Запрошен список всех жанров");
         return genres;
     }
 
@@ -40,6 +43,7 @@ public class GenreDaoImpl implements GenreDao {
                     genreRows.getInt("genre_id"),
                     genreRows.getString("name")
             );
+            log.info("Запрошен жанр id = {}", id);
             return genre;
         } else {
             throw new ResponseStatusException(
