@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -10,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.MpaDao;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class MpaDaoImpl implements MpaDao {
 
@@ -26,6 +28,7 @@ public class MpaDaoImpl implements MpaDao {
                 rs.getInt("id_mpa_rating"),
                 rs.getString("meaning_mpa"))
         );
+        log.info("Запрошен список всех рейтингов");
         return mpa;
     }
 
@@ -38,6 +41,7 @@ public class MpaDaoImpl implements MpaDao {
                     mpaRows.getInt("id_mpa_rating"),
                     mpaRows.getString("meaning_mpa")
             );
+            log.info("Запрошен рейтинг id = {}", id);
             return mpa;
         } else {
             throw new ResponseStatusException(

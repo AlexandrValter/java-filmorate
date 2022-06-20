@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -17,6 +18,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
 
+@Slf4j
 @Component("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
 
@@ -40,6 +42,7 @@ public class FilmDbStorage implements FilmStorage {
                 .getKeys();
         film.setId((Integer) keys.get("id"));
         fillingGenres(film);
+        log.info("В базу добавлен новый фильм id = {}", film.getId());
         return film;
     }
 
@@ -63,6 +66,7 @@ public class FilmDbStorage implements FilmStorage {
             String sqlDel = "DELETE FROM film_genre WHERE film_id = ?;";
             jdbcTemplate.update(sqlDel, film.getId());
             fillingGenres(film);
+            log.info("Обновлена информация о фильме id = {}", film.getId());
         } else {
             addFilm(film);
         }
@@ -81,6 +85,7 @@ public class FilmDbStorage implements FilmStorage {
                     filmRows.getInt("duration"));
             film.setMpa(getFilmMpa(id));
             film.setGenres(getFilmGenres(id));
+            log.info("Запрошен фильм id = {}", film.getId());
             return film;
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -93,6 +98,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT * FROM films;";
         Collection<Film> films = jdbcTemplate.query(sql, this::makeFilm);
         setMpaAndGenre(films);
+        log.info("Запрошен список всех фильмов");
         return films;
     }
 

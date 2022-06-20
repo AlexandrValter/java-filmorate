@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+@Slf4j
 @Service("UserDbService")
 public class UserDbService implements UserService {
 
@@ -34,6 +36,7 @@ public class UserDbService implements UserService {
     @Override
     public void addFriends(int userId, int friendId) {
         if (userStorage.getUser(userId) != null && userStorage.getUser(friendId) != null) {
+            log.info("Пользователь id={} добавляет в друзья пользователя id={}", userId, friendId);
             SqlRowSet friendRows = getFriendship(userId, friendId);
             if (!friendRows.next()) {
                 doNotBilateral(userId, friendId);
@@ -64,6 +67,7 @@ public class UserDbService implements UserService {
             if (friendship.isBilateral()) {
                 doNotBilateral(friendId, userId);
             }
+            log.info("Пользователь id={} удалил из друзей пользователя id={}", userId, friendId);
         }
     }
 
@@ -75,6 +79,7 @@ public class UserDbService implements UserService {
                     "RIGHT OUTER JOIN friendship AS fr ON fr.to_user_id = u.id " +
                     "WHERE fr.from_user_id = ?;";
             Collection<User> users = jdbcTemplate.query(sql, this::makeUser, userId);
+            log.info("Запрошен список друзей пользователя id={}", userId);
             return List.copyOf(users);
         }
         return null;
@@ -90,6 +95,7 @@ public class UserDbService implements UserService {
                     "GROUP BY to_user_id " +
                     "HAVING COUNT (to_user_id) > 1;";
             Collection<User> users = jdbcTemplate.query(sql, this::makeUser, userId, friendId);
+            log.info("Запрошены общие друзья пользователей id = {} и id = {}", userId, friendId);
             return List.copyOf(users);
         }
         return null;
