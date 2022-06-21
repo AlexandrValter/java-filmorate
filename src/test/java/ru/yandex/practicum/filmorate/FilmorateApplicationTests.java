@@ -11,10 +11,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.dao.FilmDbService;
 import ru.yandex.practicum.filmorate.service.dao.UserDbService;
-import ru.yandex.practicum.filmorate.storage.GenreDao;
-import ru.yandex.practicum.filmorate.storage.MpaDao;
-import ru.yandex.practicum.filmorate.storage.dao.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.dao.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,10 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class FilmorateApplicationTests {
 
-    private final UserDbStorage userStorage;
-    private final FilmDbStorage filmStorage;
-    private final MpaDao mpaDao;
-    private final GenreDao genreDao;
     private final UserDbService userService;
     private final FilmDbService filmService;
 
@@ -70,74 +62,74 @@ class FilmorateApplicationTests {
 
     @Test
     public void test1_addUser() {
-        assertTrue(userStorage.getAllUsers().isEmpty());
-        userStorage.addUser(user1);
-        userStorage.addUser(user2);
-        assertEquals(2, userStorage.getAllUsers().size());
-        userStorage.addUser(user3);
-        assertEquals(3, userStorage.getAllUsers().size());
+        assertTrue(userService.getAllUsers().isEmpty());
+        userService.addUser(user1);
+        userService.addUser(user2);
+        assertEquals(2, userService.getAllUsers().size());
+        userService.addUser(user3);
+        assertEquals(3, userService.getAllUsers().size());
     }
 
     @Test
     public void test2_addOrUpdateUser() {
-        assertTrue(userStorage.getAllUsers().isEmpty());
-        userStorage.addUser(user1);
-        assertEquals(1, userStorage.getAllUsers().size());
-        User user = userStorage.getUser(1);
+        assertTrue(userService.getAllUsers().isEmpty());
+        userService.addUser(user1);
+        assertEquals(1, userService.getAllUsers().size());
+        User user = userService.getUser(1);
         user.setName("change name for test");
-        userStorage.addOrUpdateUser(user);
-        assertEquals("change name for test", userStorage.getUser(1).getName());
+        userService.addOrUpdateUser(user);
+        assertEquals("change name for test", userService.getUser(1).getName());
     }
 
     @Test
     public void test3_addFilm() {
-        assertTrue(filmStorage.getAllFilms().isEmpty());
+        assertTrue(filmService.getAllFilms().isEmpty());
         film1.setMpa(new Mpa(1, "G"));
-        filmStorage.addFilm(film1);
-        assertEquals(1, filmStorage.getAllFilms().size());
+        filmService.addFilm(film1);
+        assertEquals(1, filmService.getAllFilms().size());
         film2.setMpa(new Mpa(2, "PG"));
-        filmStorage.addFilm(film2);
-        assertEquals(2, filmStorage.getAllFilms().size());
+        filmService.addFilm(film2);
+        assertEquals(2, filmService.getAllFilms().size());
     }
 
     @Test
     public void test4_addOrUpdateFilm() {
-        assertTrue(filmStorage.getAllFilms().isEmpty());
+        assertTrue(filmService.getAllFilms().isEmpty());
         film1.setMpa(new Mpa(1, "G"));
-        filmStorage.addFilm(film1);
-        assertEquals(1, filmStorage.getAllFilms().size());
-        assertEquals("nature film about Russian forest", filmStorage.getFilm(1).getDescription());
+        filmService.addFilm(film1);
+        assertEquals(1, filmService.getAllFilms().size());
+        assertEquals("nature film about Russian forest", filmService.getFilm(1).getDescription());
         film2.setId(1);
         film2.setMpa(new Mpa(2, "PG"));
-        filmStorage.addOrUpdateFilm(film2);
-        assertEquals(1, filmStorage.getAllFilms().size());
-        assertEquals("documentary film about english football", filmStorage.getFilm(1).getDescription());
+        filmService.addOrUpdateFilm(film2);
+        assertEquals(1, filmService.getAllFilms().size());
+        assertEquals("documentary film about english football", filmService.getFilm(1).getDescription());
     }
 
     @Test
     public void test5_checkMpaDao() {
-        assertEquals(5, mpaDao.getAllMpa().size());
-        assertEquals("NC-17", mpaDao.getMpa(5).getName());
-        assertEquals("PG-13", mpaDao.getMpa(3).getName());
+        assertEquals(5, filmService.getAllMpa().size());
+        assertEquals("NC-17", filmService.getMpa(5).getName());
+        assertEquals("PG-13", filmService.getMpa(3).getName());
     }
 
     @Test
     public void test6_checkGenreDao() {
-        assertEquals(6, genreDao.getAllGenres().size());
-        assertEquals("Драма", genreDao.getGenre(2).getName());
-        assertEquals("Триллер", genreDao.getGenre(4).getName());
-        assertEquals("Боевик", genreDao.getGenre(6).getName());
+        assertEquals(6, filmService.getAllGenres().size());
+        assertEquals("Драма", filmService.getGenre(2).getName());
+        assertEquals("Триллер", filmService.getGenre(4).getName());
+        assertEquals("Боевик", filmService.getGenre(6).getName());
     }
 
     @Test
-    public void test7_checkFilmService() {
+    public void test7_checkMethodsForLikes() {
         film1.setMpa(new Mpa(1, "G"));
-        filmStorage.addFilm(film1);
+        filmService.addFilm(film1);
         film2.setMpa(new Mpa(2, "PG"));
-        filmStorage.addFilm(film2);
-        userStorage.addUser(user1);
-        userStorage.addUser(user2);
-        userStorage.addUser(user3);
+        filmService.addFilm(film2);
+        userService.addUser(user1);
+        userService.addUser(user2);
+        userService.addUser(user3);
         filmService.addLike(1, 2);
         filmService.addLike(1, 1);
         filmService.addLike(2, 3);
@@ -151,10 +143,10 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void test8_checkUserService() {
-        userStorage.addUser(user1);
-        userStorage.addUser(user2);
-        userStorage.addUser(user3);
+    public void test8_checkMethodsForFriends() {
+        userService.addUser(user1);
+        userService.addUser(user2);
+        userService.addUser(user3);
         userService.addFriends(1, 2);
         userService.addFriends(1, 3);
         assertEquals(2, userService.getFriends(1).size());

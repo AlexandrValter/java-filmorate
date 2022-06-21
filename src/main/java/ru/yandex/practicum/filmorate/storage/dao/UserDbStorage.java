@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
 
-@Slf4j
 @Component("UserDbStorage")
 public class UserDbStorage implements UserStorage {
 
@@ -27,7 +25,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        user.setName(user.getName());
         Map<String, Object> keys = new SimpleJdbcInsert(this.jdbcTemplate)
                 .withTableName("users")
                 .usingColumns("login", "email", "name", "birthday")
@@ -38,14 +35,12 @@ public class UserDbStorage implements UserStorage {
                         "birthday", Date.valueOf(user.getBirthday())))
                 .getKeys();
         user.setId((Integer) keys.get("id"));
-        log.info("Добавлен пользователь id = {}", user.getId());
         return user;
     }
 
     @Override
     public Collection<User> getAllUsers() {
         String sql = "SELECT * FROM users;";
-        log.info("Запрошен список всех пользователей");
         return jdbcTemplate.query(sql, (rs, rowNum) -> new User(
                 rs.getInt("id"),
                 rs.getString("login"),
@@ -57,20 +52,14 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User addOrUpdateUser(User user) {
-        if ((user.getId() != null) && (getUser(user.getId()) != null)) {
-            user.setName(user.getName());
-            String sql = "MERGE INTO users (id, login, email, name, birthday) " +
-                    "KEY (id) VALUES (?, ?, ?, ?, ?);";
-            jdbcTemplate.update(sql,
-                    user.getId(),
-                    user.getLogin(),
-                    user.getEmail(),
-                    user.getName(),
-                    user.getBirthday());
-            log.info("Обновлена информация о пользователе id = {}", user.getId());
-        } else {
-            addUser(user);
-        }
+        String sql = "MERGE INTO users (id, login, email, name, birthday) " +
+                "KEY (id) VALUES (?, ?, ?, ?, ?);";
+        jdbcTemplate.update(sql,
+                user.getId(),
+                user.getLogin(),
+                user.getEmail(),
+                user.getName(),
+                user.getBirthday());
         return user;
     }
 
@@ -78,7 +67,6 @@ public class UserDbStorage implements UserStorage {
     public User getUser(int id) {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM users WHERE id = ?;", id);
         if (userRows.next()) {
-            log.info("Запрошена информация о пользователе id = {}", id);
             return new User(
                     userRows.getInt("id"),
                     userRows.getString("login"),

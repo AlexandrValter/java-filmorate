@@ -7,9 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,5 +69,45 @@ public class InMemoryFilmService implements FilmService{
                 .distinct()
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Film addFilm(Film film) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public Film addOrUpdateFilm(Film film) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public Film getFilm(int id) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public Collection<Film> getAllFilms() {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Genre> getAllGenres() {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public Genre getGenre(int id) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Mpa> getAllMpa() {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public Mpa getMpa(int id) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

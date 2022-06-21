@@ -34,6 +34,38 @@ public class UserDbService implements UserService {
     }
 
     @Override
+    public User addUser(User user) {
+        user.setName(user.getName());
+        userStorage.addUser(user);
+        log.info("Добавлен пользователь id = {}", user.getId());
+        return user;
+    }
+
+    @Override
+    public Collection<User> getAllUsers() {
+        log.info("Запрошен список всех пользователей");
+        return userStorage.getAllUsers();
+    }
+
+    @Override
+    public User addOrUpdateUser(User user) {
+        if ((user.getId() != null) && (getUser(user.getId()) != null)) {
+            user.setName(user.getName());
+            log.info("Обновлена информация о пользователе id = {}", user.getId());
+            return userStorage.addOrUpdateUser(user);
+        } else {
+            return addUser(user);
+        }
+    }
+
+    @Override
+    public User getUser(int id) {
+        log.info("Запрошена информация о пользователе id = {}", id);
+        return userStorage.getUser(id);
+    }
+
+
+    @Override
     public void addFriends(int userId, int friendId) {
         if (userStorage.getUser(userId) != null && userStorage.getUser(friendId) != null) {
             log.info("Пользователь id={} добавляет в друзья пользователя id={}", userId, friendId);
@@ -109,12 +141,12 @@ public class UserDbService implements UserService {
     private SqlRowSet getFriendship(int userId, int friendId) {
         return jdbcTemplate.queryForRowSet(
                 "SELECT * " +
-                "FROM friendship " +
-                "WHERE from_user_id = ? AND to_user_id = ?;",
+                        "FROM friendship " +
+                        "WHERE from_user_id = ? AND to_user_id = ?;",
                 userId, friendId);
     }
 
-    private User makeUser(ResultSet rs, int rowNum){
+    private User makeUser(ResultSet rs, int rowNum) {
         try {
             return new User(
                     rs.getInt("to_user_id"),
