@@ -158,4 +158,5 @@ class FilmorateApplicationTests {
         userService.deleteFriends(1, 3);
         assertTrue(userService.getFriends(1).isEmpty());
     }
+
 }

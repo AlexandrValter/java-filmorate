@@ -14,13 +14,13 @@ import java.util.Set;
 @Component
 @Primary
 
-public class RecommendationHtndlerWithOutMarksImpl implements RecommendationHtndler {
+public class RecommendationHandlerWithOutMarksImpl implements RecommendationHandler {
     public static final float SIMILAR_PERCENT = 0.5f;
     private final LikeDao likeDao;
 
     private final FilmService filmService;
 
-    public RecommendationHtndlerWithOutMarksImpl(LikeDao likeDao, @Qualifier("FilmDbService") FilmService filmService) {
+    public RecommendationHandlerWithOutMarksImpl(LikeDao likeDao, @Qualifier("FilmDbService") FilmService filmService) {
         this.likeDao = likeDao;
         this.filmService = filmService;
     }
