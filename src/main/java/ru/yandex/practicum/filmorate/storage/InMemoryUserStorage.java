@@ -65,7 +65,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteUser(int id) {
-
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     private void setName(User user) {

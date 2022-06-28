@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.RecommendationHtndler;
+import ru.yandex.practicum.filmorate.service.RecommendationHandler;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -28,15 +28,15 @@ public class UserDbService implements UserService {
 
     private final JdbcTemplate jdbcTemplate;
     private final UserStorage userStorage;
-    private final RecommendationHtndler recommendationHtndler;
+    private final RecommendationHandler recommendationHandler;
 
     @Autowired
     public UserDbService(JdbcTemplate jdbcTemplate,
                          @Qualifier("UserDbStorage") UserStorage userStorage,
-                         RecommendationHtndler recommendationHtndler) {
+                         RecommendationHandler recommendationHandler) {
         this.jdbcTemplate = jdbcTemplate;
         this.userStorage = userStorage;
-        this.recommendationHtndler= recommendationHtndler;
+        this.recommendationHandler = recommendationHandler;
     }
 
     @Override
@@ -141,7 +141,7 @@ public class UserDbService implements UserService {
 
     @Override
     public Set<Film> findRecommendation(int id) {
-        return recommendationHtndler.findRecommendation(id);
+        return recommendationHandler.findRecommendation(id);
     }
 
     @Override

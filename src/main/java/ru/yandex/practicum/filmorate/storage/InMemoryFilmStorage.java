@@ -43,7 +43,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void deleteFilm(int filmId) {
-
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Override
