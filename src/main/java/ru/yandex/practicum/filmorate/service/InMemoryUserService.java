@@ -6,13 +6,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.model.Feed;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -121,7 +122,12 @@ public class InMemoryUserService implements UserService{
     }
 
     @Override
-    public List<Feed> getFeeds(int id) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    public Set<Film> findRecommendation(int id) {   // TODO: 28.06.2022 доделывать?
+        return null;
+    }
+
+    @Override
+    public void deleteUser(int id) {
+
     }
 }

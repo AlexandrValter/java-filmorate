@@ -42,6 +42,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public void deleteFilm(int filmId) {
+
+    }
+
+    @Override
     public Map<Integer, Film> getFilms() {
         return films;
     }
