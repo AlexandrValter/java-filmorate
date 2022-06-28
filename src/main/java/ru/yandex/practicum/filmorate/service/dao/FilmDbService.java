@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreDao;
@@ -52,6 +50,8 @@ public class FilmDbService implements FilmService {
         if (filmStorage.getFilm(filmId) != null && userStorage.getUser(userId) != null) {
             String sql = "MERGE INTO likes KEY(film_id, user_id) VALUES (?, ?);";
             jdbcTemplate.update(sql, filmId, userId);
+            String sqlFeed = "INSERT INTO feeds (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?);";
+            jdbcTemplate.update(sqlFeed, userId, Event.LIKE.toString(), Operation.ADD.toString(), filmId);
             log.info("Пользователь id={} поставил лайк фильму id={}", userId, filmId);
         }
     }
@@ -74,6 +74,8 @@ public class FilmDbService implements FilmService {
         if (filmStorage.getFilm(filmId) != null && userStorage.getUser(userId) != null) {
             String sql = "DELETE FROM likes WHERE film_id = ? AND user_id = ?;";
             jdbcTemplate.update(sql, filmId, userId);
+            String sqlFeed = "INSERT INTO feeds (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?);";
+            jdbcTemplate.update(sqlFeed, userId, Event.LIKE.toString(), Operation.REMOVE.toString(), filmId);
             log.info("Пользователь id={} удалил лайк с фильма id={}", userId, filmId);
         }
     }

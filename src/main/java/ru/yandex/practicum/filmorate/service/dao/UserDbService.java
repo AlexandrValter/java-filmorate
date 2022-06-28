@@ -8,8 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.model.Friendship;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -69,6 +68,8 @@ public class UserDbService implements UserService {
     public void addFriends(int userId, int friendId) {
         if (userStorage.getUser(userId) != null && userStorage.getUser(friendId) != null) {
             log.info("Пользователь id={} добавляет в друзья пользователя id={}", userId, friendId);
+            String sqlFeed = "INSERT INTO feeds (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?);";
+            jdbcTemplate.update(sqlFeed, userId, Event.FRIEND.toString(), Operation.ADD.toString(), friendId);
             SqlRowSet friendRows = getFriendship(userId, friendId);
             if (!friendRows.next()) {
                 doNotBilateral(userId, friendId);
@@ -99,6 +100,8 @@ public class UserDbService implements UserService {
             if (friendship.isBilateral()) {
                 doNotBilateral(friendId, userId);
             }
+            String sqlFeed = "INSERT INTO feeds (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?);";
+            jdbcTemplate.update(sqlFeed, userId, Event.FRIEND.toString(), Operation.REMOVE.toString(), friendId);
             log.info("Пользователь id={} удалил из друзей пользователя id={}", userId, friendId);
         }
     }
@@ -129,6 +132,23 @@ public class UserDbService implements UserService {
             Collection<User> users = jdbcTemplate.query(sql, this::makeUser, userId, friendId);
             log.info("Запрошены общие друзья пользователей id = {} и id = {}", userId, friendId);
             return List.copyOf(users);
+        }
+        return null;
+    }
+
+    @Override
+    public List<Feed> getFeeds(int id) {
+        if (userStorage.getUser(id) != null) {
+            String sql = "SELECT * FROM feeds WHERE user_id = ?;";
+            Collection<Feed> feeds = jdbcTemplate.query(sql, (rs, rowNum) -> new Feed(
+                    rs.getTimestamp("time").toInstant().toEpochMilli(),
+                    rs.getInt("user_id"),
+                    Event.valueOf(rs.getString("event_type")),
+                    Operation.valueOf(rs.getString("operation")),
+                    rs.getInt("event_id"),
+                    rs.getInt("entity_id")), id);
+            log.info("Запрошена лента событий пользователя id = {}", id);
+            return List.copyOf(feeds);
         }
         return null;
     }
