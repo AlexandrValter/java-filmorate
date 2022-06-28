@@ -63,6 +63,11 @@ public class InMemoryUserStorage implements UserStorage {
         return users;
     }
 
+    @Override
+    public void deleteUser(int id) {
+
+    }
+
     private void setName(User user) {
         if (user.getName() == null) {
             log.warn("Имя не введено");

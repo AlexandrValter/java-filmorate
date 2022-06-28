@@ -138,6 +138,11 @@ public class FilmDbService implements FilmService {
         return mpaDao.getMpa(id);
     }
 
+    @Override
+    public void deleteFilm(int filmId) {
+        filmStorage.deleteFilm(filmId);
+    }
+
     private Mpa getFilmMpa(int id) {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
                 "SELECT f.id_mpa, mr.meaning_mpa " +

@@ -8,8 +8,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.RecommendationHtndler;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -18,6 +20,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service("UserDbService")
@@ -25,12 +28,15 @@ public class UserDbService implements UserService {
 
     private final JdbcTemplate jdbcTemplate;
     private final UserStorage userStorage;
+    private final RecommendationHtndler recommendationHtndler;
 
     @Autowired
     public UserDbService(JdbcTemplate jdbcTemplate,
-                         @Qualifier("UserDbStorage") UserStorage userStorage) {
+                         @Qualifier("UserDbStorage") UserStorage userStorage,
+                         RecommendationHtndler recommendationHtndler) {
         this.jdbcTemplate = jdbcTemplate;
         this.userStorage = userStorage;
+        this.recommendationHtndler= recommendationHtndler;
     }
 
     @Override
@@ -131,6 +137,16 @@ public class UserDbService implements UserService {
             return List.copyOf(users);
         }
         return null;
+    }
+
+    @Override
+    public Set<Film> findRecommendation(int id) {
+        return recommendationHtndler.findRecommendation(id);
+    }
+
+    @Override
+    public void deleteUser(int id) {
+        userStorage.deleteUser(id);
     }
 
     private void doNotBilateral(int userId, int friendId) {
