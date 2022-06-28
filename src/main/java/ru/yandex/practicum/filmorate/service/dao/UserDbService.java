@@ -12,6 +12,9 @@ import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.RecommendationHandler;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.FeedDao;
+import ru.yandex.practicum.filmorate.model.Friendship;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.ResultSet;
@@ -38,6 +41,12 @@ public class UserDbService implements UserService {
         this.userStorage = userStorage;
         this.recommendationHandler = recommendationHandler;
         this.feedDao = feedDao;
+
+    @Autowired
+    public UserDbService(JdbcTemplate jdbcTemplate,
+                         @Qualifier("UserDbStorage") UserStorage userStorage) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.userStorage = userStorage;
     }
 
     @Override
@@ -70,6 +79,7 @@ public class UserDbService implements UserService {
         log.info("Запрошена информация о пользователе id = {}", id);
         return userStorage.getUser(id);
     }
+
 
     @Override
     public void addFriends(int userId, int friendId) {
