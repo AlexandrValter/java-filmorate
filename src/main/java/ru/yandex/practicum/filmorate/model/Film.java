@@ -28,6 +28,7 @@ public class Film {
     private final Integer duration;
     private TreeSet<Genre> genres;
     private Mpa mpa;
+    private Set<Director> directors;
 
     public Film(Integer id,
                 String name,

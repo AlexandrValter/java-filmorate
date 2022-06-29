@@ -97,6 +97,21 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getFilmsByDirector(Integer idDirector, String param) {
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, COUNT (l.user_id) " +
+                "FROM films AS f LEFT JOIN likes AS l ON f.id = l.film_id " +
+                "WHERE f.ID IN (SELECT ID_FILM FROM DIRECTORS_FILMS_LINK WHERE ID_DIRECTOR=?)" +
+                "GROUP BY f.id ";
+        if (param.equals("likes")) {
+            sql += "ORDER BY COUNT (l.user_id) DESC";
+        } else if (param.equals("year")) {
+            sql += "ORDER BY f.release_date";
+        }
+
+        return jdbcTemplate.query(sql, this::makeFilm, idDirector);
+    }
+
+    @Override
     public void deleteFilm(int filmId) {
         String sql = "DELETE FROM FILMS WHERE ID=?";
         jdbcTemplate.update(sql,ps -> {

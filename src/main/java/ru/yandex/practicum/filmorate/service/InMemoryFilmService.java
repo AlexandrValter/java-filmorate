@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class InMemoryFilmService implements FilmService{
+public class InMemoryFilmService implements FilmService {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
@@ -113,6 +113,11 @@ public class InMemoryFilmService implements FilmService{
 
     @Override
     public void deleteFilm(int filmId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> filmByDirector(Integer idDirector, String param) {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }
