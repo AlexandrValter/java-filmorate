@@ -96,6 +96,14 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sql, this::makeFilm, count);
     }
 
+    @Override
+    public void deleteFilm(int filmId) {
+        String sql = "DELETE FROM FILMS WHERE ID=?";
+        jdbcTemplate.update(sql,ps -> {
+            ps.setInt(1,filmId);
+        });
+    }
+
     private Film makeFilm(ResultSet rs, int rowNum) {
         try {
             return new Film(

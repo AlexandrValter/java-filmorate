@@ -30,4 +30,6 @@ public interface FilmService {
     List<Mpa> getAllMpa();
 
     Mpa getMpa(int id);
+
+    void deleteFilm(int filmId);
 }
