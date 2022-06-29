@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.RecommendationHandler;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.FeedDao;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.ResultSet;
@@ -27,14 +28,16 @@ public class UserDbService implements UserService {
     private final JdbcTemplate jdbcTemplate;
     private final UserStorage userStorage;
     private final RecommendationHandler recommendationHandler;
+    private final FeedDao feedDao;
 
     @Autowired
     public UserDbService(JdbcTemplate jdbcTemplate,
                          @Qualifier("UserDbStorage") UserStorage userStorage,
-                         RecommendationHandler recommendationHandler) {
+                         RecommendationHandler recommendationHandler, FeedDao feedDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.userStorage = userStorage;
         this.recommendationHandler = recommendationHandler;
+        this.feedDao = feedDao;
     }
 
     @Override
@@ -72,8 +75,7 @@ public class UserDbService implements UserService {
     public void addFriends(int userId, int friendId) {
         if (userStorage.getUser(userId) != null && userStorage.getUser(friendId) != null) {
             log.info("Пользователь id={} добавляет в друзья пользователя id={}", userId, friendId);
-            String sqlFeed = "INSERT INTO feeds (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?);";
-            jdbcTemplate.update(sqlFeed, userId, Event.FRIEND.toString(), Operation.ADD.toString(), friendId);
+            feedDao.addFeed(userId, Event.FRIEND, Operation.ADD, friendId);
             SqlRowSet friendRows = getFriendship(userId, friendId);
             if (!friendRows.next()) {
                 doNotBilateral(userId, friendId);
@@ -104,8 +106,7 @@ public class UserDbService implements UserService {
             if (friendship.isBilateral()) {
                 doNotBilateral(friendId, userId);
             }
-            String sqlFeed = "INSERT INTO feeds (user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?);";
-            jdbcTemplate.update(sqlFeed, userId, Event.FRIEND.toString(), Operation.REMOVE.toString(), friendId);
+            feedDao.addFeed(userId, Event.FRIEND, Operation.REMOVE, friendId);
             log.info("Пользователь id={} удалил из друзей пользователя id={}", userId, friendId);
         }
     }
@@ -153,16 +154,8 @@ public class UserDbService implements UserService {
     @Override
     public List<Feed> getFeeds(int id) {
         if (userStorage.getUser(id) != null) {
-            String sql = "SELECT * FROM feeds WHERE user_id = ?;";
-            Collection<Feed> feeds = jdbcTemplate.query(sql, (rs, rowNum) -> new Feed(
-                    rs.getTimestamp("time").toInstant().toEpochMilli(),
-                    rs.getInt("user_id"),
-                    Event.valueOf(rs.getString("event_type")),
-                    Operation.valueOf(rs.getString("operation")),
-                    rs.getInt("event_id"),
-                    rs.getInt("entity_id")), id);
             log.info("Запрошена лента событий пользователя id = {}", id);
-            return List.copyOf(feeds);
+            return feedDao.getFeeds(id);
         }
         return null;
     }
