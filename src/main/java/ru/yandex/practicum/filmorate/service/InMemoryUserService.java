@@ -122,12 +122,12 @@ public class InMemoryUserService implements UserService{
     }
 
     @Override
-    public Set<Film> findRecommendation(int id) {   // TODO: 28.06.2022 доделывать?
-        return null;
+    public Set<Film> findRecommendation(int id) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Override
     public void deleteUser(int id) {
-
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }
