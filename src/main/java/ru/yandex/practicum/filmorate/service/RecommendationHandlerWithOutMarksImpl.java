@@ -10,12 +10,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Primary
 
 public class RecommendationHandlerWithOutMarksImpl implements RecommendationHandler {
-    public static final float SIMILAR_PERCENT = 0.5f;
     private final LikeDao likeDao;
 
     private final FilmService filmService;
@@ -28,29 +28,31 @@ public class RecommendationHandlerWithOutMarksImpl implements RecommendationHand
     @Override
     public Set<Film> findRecommendation(int userId) {
         Map<Integer, Set<Integer>> data = initializeData(); // TODO: 28.06.2022  проверить есть ли user
-        Map<Integer, Float> similarsPercentMap = getSimilarMap(userId, data);
+        Map<Integer, Integer> similarsMap = getSimilarMap(userId, data);
         Set<Integer> userFilmSet = data.get(userId);
         Set<Film> recomSet = new HashSet<>();
-        similarsPercentMap.keySet()
+        AtomicInteger count = new AtomicInteger(0);
+        similarsMap.keySet()
                 .forEach(u -> {
-                    if (similarsPercentMap.get(u) >= SIMILAR_PERCENT) {
+                    if (similarsMap.get(u) >= count.get()) {
                         data.get(u).stream()
                                 .filter(f -> !userFilmSet.contains(f))
                                 .map(filmService::getFilm)
                                 .forEach(recomSet::add);
+                        count.set(similarsMap.get(u));
                     }
                 });
         return recomSet;
     }
 
-    private Map<Integer, Float> getSimilarMap(int userId, Map<Integer, Set<Integer>> data) {
-        Map<Integer, Float> similarLikesMap = new HashMap<>();
+    private Map<Integer, Integer> getSimilarMap(int userId, Map<Integer, Set<Integer>> data) {
+        Map<Integer, Integer> similarLikesMap = new HashMap<>();
         Set userLikesSet = data.get(userId);
         data.keySet().stream()
                 .filter(user -> !similarLikesMap.containsKey(user) && user != userId).forEach(user -> {
-                    float similar = data.get(user).stream()
+                    Integer similar = (int)data.get(user).stream()
                             .filter(userLikesSet::contains)
-                            .count() / (float) userLikesSet.size();
+                            .count();
                     similarLikesMap.put(user, similar);
                 });
 
