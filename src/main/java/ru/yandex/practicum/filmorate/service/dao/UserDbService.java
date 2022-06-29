@@ -68,7 +68,6 @@ public class UserDbService implements UserService {
         return userStorage.getUser(id);
     }
 
-
     @Override
     public void addFriends(int userId, int friendId) {
         if (userStorage.getUser(userId) != null && userStorage.getUser(friendId) != null) {

@@ -62,10 +62,12 @@ public class UserController {
     public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
         return userService.getCommonFriends(id, otherId);
     }
+
     @GetMapping("/{id}/recommendations")
     public Set<Film> findRecommendation(@PathVariable int id){
         return userService.findRecommendation(id);
     }
+
     @DeleteMapping("/{userId}")
     public  void deleteUser(@PathVariable int userId){
         userService.deleteUser(userId);
