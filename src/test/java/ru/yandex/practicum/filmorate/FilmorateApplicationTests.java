@@ -5,15 +5,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.dao.FilmDbService;
 import ru.yandex.practicum.filmorate.service.dao.UserDbService;
+import ru.yandex.practicum.filmorate.storage.LikeDao;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,6 +28,7 @@ class FilmorateApplicationTests {
 
     private final UserDbService userService;
     private final FilmDbService filmService;
+    private final LikeDao likeDao;
 
     private User user1 = new User(
             1,
@@ -159,4 +163,34 @@ class FilmorateApplicationTests {
         assertTrue(userService.getFriends(1).isEmpty());
     }
 
+    @Test
+    public void test9_checkDeleteUser() {
+        userService.addUser(user1);
+        userService.addUser(user2);
+        userService.addFriends(user1.getId(), user2.getId());
+        userService.addFriends(user2.getId(), user1.getId());
+        film1.setMpa(new Mpa(2, "PG"));
+        filmService.addFilm(film1);
+        filmService.addLike(film1.getId(), user1.getId());
+
+        userService.deleteUser(user1.getId());
+
+        assertEquals(1, userService.getAllUsers().size());
+        assertFalse(userService.getUser(user2.getId()).getFriends().contains(user1.getId()));
+        assertEquals(0,filmService.getFilm(film1.getId()).getLikes().size());
+    }
+    @Test
+    public void test10_checkDeleteFilm(){
+        film1.setMpa(filmService.getMpa(1));
+        userService.addUser(user1);
+        filmService.addFilm(film1);
+        filmService.addLike(film1.getId(),user1.getId());
+        film1.setGenres(new TreeSet<>(filmService.getAllGenres()));
+
+        filmService.deleteFilm(film1.getId());
+
+        assertEquals(0,filmService.getAllFilms().size());
+        assertEquals(0,likeDao.getAllLikes().size());
+
+    }
 }
