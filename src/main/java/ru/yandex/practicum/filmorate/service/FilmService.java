@@ -15,6 +15,8 @@ public interface FilmService {
 
     List<Film> popularFilms(int count);
 
+    List<Film> filmByDirector(Integer idDirector,String param);
+
     Film addFilm(Film film);
 
     Film addOrUpdateFilm(Film film);

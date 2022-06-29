@@ -58,8 +58,8 @@ public class FilmDbStorage implements FilmStorage {
                 film.getReleaseDate(),
                 film.getDuration(),
                 film.getMpa().getId());
-        String sqlDel = "DELETE FROM film_genre WHERE film_id = ?;";
-        jdbcTemplate.update(sqlDel, film.getId());
+        String sqlDel = "DELETE FROM film_genre WHERE film_id = ?;DELETE FROM DIRECTORS_FILMS_LINK WHERE ID_FILM = ?;";
+        jdbcTemplate.update(sqlDel, film.getId(),film.getId());
         return film;
     }
 
@@ -94,6 +94,21 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY COUNT (l.user_id) DESC " +
                 "LIMIT ?;";
         return jdbcTemplate.query(sql, this::makeFilm, count);
+    }
+
+    @Override
+    public List<Film> getFilmsByDirector(Integer idDirector, String param) {
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, COUNT (l.user_id) " +
+                "FROM films AS f LEFT JOIN likes AS l ON f.id = l.film_id " +
+                "WHERE f.ID IN (SELECT ID_FILM FROM DIRECTORS_FILMS_LINK WHERE ID_DIRECTOR=?)" +
+                "GROUP BY f.id ";
+        if (param.equals("likes")) {
+            sql += "ORDER BY COUNT (l.user_id) DESC";
+        } else if (param.equals("year")) {
+            sql += "ORDER BY f.release_date";
+        }
+
+        return jdbcTemplate.query(sql, this::makeFilm, idDirector);
     }
 
     private Film makeFilm(ResultSet rs, int rowNum) {

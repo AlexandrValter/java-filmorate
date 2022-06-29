@@ -32,6 +32,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getFilmsByDirector(Integer id, String param) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
     public Collection<Film> getAllFilms() {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }

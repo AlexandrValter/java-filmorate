@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -14,9 +15,7 @@ import ru.yandex.practicum.filmorate.storage.GenreDao;
 import ru.yandex.practicum.filmorate.storage.MpaDao;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 @Slf4j
 @Service("FilmDbService")
@@ -43,6 +42,7 @@ public class FilmDbService implements FilmService {
     public Film addFilm(Film film) {
         filmStorage.addFilm(film);
         fillingGenres(film);
+        fillingDirectors(film);
         log.info("В базу добавлен новый фильм id = {}", film.getId());
         return film;
     }
@@ -61,6 +61,7 @@ public class FilmDbService implements FilmService {
         if (film.getId() != null && getFilm(film.getId()) != null) {
             filmStorage.addOrUpdateFilm(film);
             fillingGenres(film);
+            fillingDirectors(film);
             log.info("Обновлена информация о фильме id = {}", film.getId());
             return film;
         } else {
@@ -101,6 +102,13 @@ public class FilmDbService implements FilmService {
     }
 
     @Override
+    public List<Film> filmByDirector(Integer idDirector, String param) {
+        List<Film> films = filmStorage.getFilmsByDirector(idDirector, param);
+        log.info("Запрошены фильмы режиссера id={}", idDirector);
+        return films;
+    }
+
+    @Override
     public List<Genre> getAllGenres() {
         log.info("Запрошен список всех жанров");
         return genreDao.getAllGenres();
@@ -124,6 +132,17 @@ public class FilmDbService implements FilmService {
         } else {
             return null;
         }
+    }
+
+    private Set<Director> getFilmDirector(Integer id){
+        String sql = "SELECT DFL.ID_DIRECTOR id_dir,D.NAME name FROM DIRECTORS_FILMS_LINK DFL "
+        +"LEFT JOIN DIRECTORS D on D.ID_DIRECTOR = DFL.ID_DIRECTOR "
+                + "WHERE  DFL.ID_FILM=?";
+        List<Director> directors = jdbcTemplate.query(sql,(rs, rowNum) ->
+                new Director(rs.getInt("id_dir"),rs.getString("name")),id);
+        if(!directors.isEmpty()) {
+            return new HashSet<>(directors);
+        } else return null;
     }
 
     @Override
@@ -161,11 +180,22 @@ public class FilmDbService implements FilmService {
         }
     }
 
+    private void fillingDirectors(Film film) {
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            for (Director director : film.getDirectors()) {
+                String sql = "MERGE INTO DIRECTORS_FILMS_LINK(ID_DIRECTOR, ID_FILM) "
+                        + "KEY (ID_DIRECTOR,ID_FILM) VALUES ( ?,? )";
+                jdbcTemplate.update(sql, director.getId(), film.getId());
+            }
+        }
+    }
+
     private void setMpaAndGenre(Collection<Film> films) {
         if (!films.isEmpty()) {
             for (Film film : films) {
                 film.setGenres(getFilmGenres(film.getId()));
                 film.setMpa(getFilmMpa(film.getId()));
+                film.setDirectors(getFilmDirector(film.getId()));
             }
         }
     }
