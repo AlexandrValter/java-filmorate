@@ -83,4 +83,12 @@ public class UserDbStorage implements UserStorage {
     public Map<Integer, User> getUsers() {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
+
+    @Override
+    public void deleteUser(int id) {
+        String userDeleteSql ="DELETE FROM USERS WHERE ID=?";
+        jdbcTemplate.update(userDeleteSql,ps -> {
+            ps.setInt(1,id);
+        });
+    }
 }

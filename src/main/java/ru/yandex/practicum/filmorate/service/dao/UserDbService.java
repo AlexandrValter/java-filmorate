@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.service.RecommendationHandler;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -17,6 +18,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service("UserDbService")
@@ -24,12 +26,15 @@ public class UserDbService implements UserService {
 
     private final JdbcTemplate jdbcTemplate;
     private final UserStorage userStorage;
+    private final RecommendationHandler recommendationHandler;
 
     @Autowired
     public UserDbService(JdbcTemplate jdbcTemplate,
-                         @Qualifier("UserDbStorage") UserStorage userStorage) {
+                         @Qualifier("UserDbStorage") UserStorage userStorage,
+                         RecommendationHandler recommendationHandler) {
         this.jdbcTemplate = jdbcTemplate;
         this.userStorage = userStorage;
+        this.recommendationHandler = recommendationHandler;
     }
 
     @Override
@@ -134,6 +139,16 @@ public class UserDbService implements UserService {
             return List.copyOf(users);
         }
         return null;
+    }
+
+    @Override
+    public Set<Film> findRecommendation(int id) {
+        return recommendationHandler.findRecommendation(id);
+    }
+
+    @Override
+    public void deleteUser(int id) {
+        userStorage.deleteUser(id);
     }
 
     @Override

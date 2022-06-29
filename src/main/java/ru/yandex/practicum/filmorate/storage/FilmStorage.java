@@ -19,4 +19,6 @@ public interface FilmStorage {
     Collection<Film> getAllFilms();
 
     List<Film> getPopularFilms(int count);
+
+    void deleteFilm(int filmId);
 }
