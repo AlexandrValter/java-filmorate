@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.dao.FilmDbService;
 import ru.yandex.practicum.filmorate.service.dao.UserDbService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +26,7 @@ class FilmorateApplicationTests {
 
     private final UserDbService userService;
     private final FilmDbService filmService;
+    private final FilmStorage filmStorage;
 
     private User user1 = new User(
             1,
@@ -157,6 +159,27 @@ class FilmorateApplicationTests {
         userService.deleteFriends(1, 2);
         userService.deleteFriends(1, 3);
         assertTrue(userService.getFriends(1).isEmpty());
+    }
+
+    @Test
+    public void test9_checkCommonFilms() {
+        Mpa mpa = filmService.getMpa(1);
+        for (int i = 1; i < 5; i++) {
+            Film film = new Film(i, ("Film" + 1), "", LocalDate.now(), 50);
+            film.setMpa(mpa);
+            filmService.addFilm(film);
+        }
+        userService.addUser(user1);
+        userService.addUser(user2);
+        filmService.addLike(1, user1.getId());
+        filmService.addLike(2, user1.getId());
+        filmService.addLike(4, user1.getId());
+        filmService.addLike(1, user2.getId());
+        filmService.addLike(4, user2.getId());
+
+        assertEquals(2, filmService.findCommonFilms(1, 2).size());
+        assertTrue(filmService.findCommonFilms(1, 2).contains(filmStorage.getFilm(1)) &&
+                filmService.findCommonFilms(1, 2).contains(filmStorage.getFilm(4)));
     }
 
 }
