@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Component("FilmDbStorage")
+@Primary
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
@@ -109,7 +110,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Set<Film> getUserLikedFilms(int userId) {
         String sqlUserLiked = "SELECT * FROM FILMS WHERE ID IN(SELECT FILM_ID FROM LIKES WHERE USER_ID =?) ";
-        return Set.copyOf(jdbcTemplate.query(sqlUserLiked, this::makeFilm));
+        return Set.copyOf(jdbcTemplate.query(sqlUserLiked, this::makeFilm,userId));
 
     }
 
