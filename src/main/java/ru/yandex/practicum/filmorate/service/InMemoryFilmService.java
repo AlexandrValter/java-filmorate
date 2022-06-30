@@ -113,6 +113,6 @@ public class InMemoryFilmService implements FilmService{
 
     @Override
     public void deleteFilm(int filmId) {
-
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

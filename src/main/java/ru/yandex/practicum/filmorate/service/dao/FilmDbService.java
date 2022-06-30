@@ -5,14 +5,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreDao;
-import ru.yandex.practicum.filmorate.storage.MpaDao;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,17 +21,20 @@ public class FilmDbService implements FilmService {
     private final UserStorage userStorage;
     private final GenreDao genreDao;
     private final MpaDao mpaDao;
+    private final FeedDao feedDao;
 
     public FilmDbService(JdbcTemplate jdbcTemplate,
                          @Qualifier("FilmDbStorage") FilmStorage filmStorage,
                          @Qualifier("UserDbStorage") UserStorage userStorage,
                          GenreDao genreDao,
-                         MpaDao mpaDao) {
+                         MpaDao mpaDao,
+                         FeedDao feedDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreDao = genreDao;
         this.mpaDao = mpaDao;
+        this.feedDao = feedDao;
     }
 
     @Override
@@ -52,6 +50,7 @@ public class FilmDbService implements FilmService {
         if (filmStorage.getFilm(filmId) != null && userStorage.getUser(userId) != null) {
             String sql = "MERGE INTO likes KEY(film_id, user_id) VALUES (?, ?);";
             jdbcTemplate.update(sql, filmId, userId);
+            feedDao.addFeed(userId, Event.LIKE, Operation.ADD, filmId);
             log.info("Пользователь id={} поставил лайк фильму id={}", userId, filmId);
         }
     }
@@ -74,6 +73,7 @@ public class FilmDbService implements FilmService {
         if (filmStorage.getFilm(filmId) != null && userStorage.getUser(userId) != null) {
             String sql = "DELETE FROM likes WHERE film_id = ? AND user_id = ?;";
             jdbcTemplate.update(sql, filmId, userId);
+            feedDao.addFeed(userId, Event.LIKE, Operation.REMOVE, filmId);
             log.info("Пользователь id={} удалил лайк с фильма id={}", userId, filmId);
         }
     }
