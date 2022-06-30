@@ -149,6 +149,10 @@ public class FilmDbService implements FilmService {
     public Set<Film> findCommonFilms(int userId, int friendId) {
         Set<Film> userFilms = filmStorage.getUserLikedFilms(userId);
         Set<Film> friendFilms = filmStorage.getUserLikedFilms(friendId);
+        userFilms.forEach(film->{
+            film.setMpa(getFilmMpa(film.getId()));
+            film.setGenres(getFilmGenres(film.getId()));
+        });
         return Set.copyOf(userFilms.stream().filter(friendFilms::contains).collect(Collectors.toList()));
     }
 
