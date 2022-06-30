@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -113,6 +114,11 @@ public class InMemoryFilmService implements FilmService{
 
     @Override
     public void deleteFilm(int filmId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public Set<Film> findCommonFilms(int userId, int friendId) {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

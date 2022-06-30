@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface FilmStorage {
 
@@ -21,4 +22,6 @@ public interface FilmStorage {
     List<Film> getPopularFilms(int count);
 
     void deleteFilm(int filmId);
+
+    Set<Film> getUserLikedFilms(int userId);
 }

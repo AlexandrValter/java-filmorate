@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
@@ -99,9 +100,16 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteFilm(int filmId) {
         String sql = "DELETE FROM FILMS WHERE ID=?";
-        jdbcTemplate.update(sql,ps -> {
-            ps.setInt(1,filmId);
+        jdbcTemplate.update(sql, ps -> {
+            ps.setInt(1, filmId);
         });
+    }
+
+    @Override
+    public Set<Film> getUserLikedFilms(int userId) {
+        String sqlUserLiked = "SELECT * FROM FILMS WHERE ID IN(SELECT FILM_ID FROM LIKES WHERE USER_ID =?) ";
+        return Set.copyOf(jdbcTemplate.query(sqlUserLiked, this::makeFilm));
+
     }
 
     private Film makeFilm(ResultSet rs, int rowNum) {

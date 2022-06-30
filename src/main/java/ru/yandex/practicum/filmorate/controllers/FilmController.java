@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/films")
@@ -58,6 +59,10 @@ public class FilmController {
     @DeleteMapping("/{filmId}")
     public void deleteFilm(@PathVariable int filmId){
         filmService.deleteFilm(filmId);
+    }
+    @GetMapping("/common?userId={userId}&friendId={friendId}")
+    public Set<Film> findCommonFilms(@PathVariable int userId, @PathVariable int friendId){
+        return filmService.findCommonFilms(userId,friendId);
     }
 
 }

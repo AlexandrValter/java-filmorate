@@ -11,7 +11,9 @@ import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service("FilmDbService")
@@ -141,6 +143,13 @@ public class FilmDbService implements FilmService {
     @Override
     public void deleteFilm(int filmId) {
         filmStorage.deleteFilm(filmId);
+    }
+
+    @Override
+    public Set<Film> findCommonFilms(int userId, int friendId) {
+        Set<Film> userFilms = filmStorage.getUserLikedFilms(userId);
+        Set<Film> friendFilms = filmStorage.getUserLikedFilms(friendId);
+        return Set.copyOf(userFilms.stream().filter(friendFilms::contains).collect(Collectors.toList()));
     }
 
     private Mpa getFilmMpa(int id) {
