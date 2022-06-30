@@ -10,10 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreDao;
-import ru.yandex.practicum.filmorate.storage.MpaDao;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.*;
 
@@ -26,16 +23,20 @@ public class FilmDbService implements FilmService {
     private final GenreDao genreDao;
     private final MpaDao mpaDao;
 
+    private final DirectorDao directorDao;
+
     public FilmDbService(JdbcTemplate jdbcTemplate,
                          @Qualifier("FilmDbStorage") FilmStorage filmStorage,
                          @Qualifier("UserDbStorage") UserStorage userStorage,
                          GenreDao genreDao,
-                         MpaDao mpaDao) {
+                         MpaDao mpaDao,
+                         DirectorDao directorDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreDao = genreDao;
         this.mpaDao = mpaDao;
+        this.directorDao = directorDao;
     }
 
     @Override
@@ -84,13 +85,19 @@ public class FilmDbService implements FilmService {
         Film film = filmStorage.getFilm(id);
         film.setMpa(getFilmMpa(id));
         film.setGenres(getFilmGenres(id));
+        film.setDirectors(getFilmDirector(id));
         log.info("Запрошен фильм id = {}", film.getId());
         return film;
     }
 
     @Override
     public Collection<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        Collection<Film> films = filmStorage.getAllFilms();
+        films
+                .forEach(film -> {film.setMpa(getFilmMpa(film.getId()));
+                    film.setGenres(getFilmGenres(film.getId()));
+                    film.setDirectors(getFilmDirector(film.getId()));});
+        return films;
     }
 
     @Override
@@ -103,9 +110,15 @@ public class FilmDbService implements FilmService {
 
     @Override
     public List<Film> filmByDirector(Integer idDirector, String param) {
-        List<Film> films = filmStorage.getFilmsByDirector(idDirector, param);
-        log.info("Запрошены фильмы режиссера id={}", idDirector);
-        return films;
+        if(directorDao.getDirector(idDirector) != null) {
+            List<Film> films = filmStorage.getFilmsByDirector(idDirector, param);
+            films.forEach(film -> {film.setMpa(getFilmMpa(film.getId()));
+                film.setGenres(getFilmGenres(film.getId()));
+                film.setDirectors(getFilmDirector(film.getId()));});
+            log.info("Запрошены фильмы режиссера id={}", idDirector);
+            return films;
+        }
+        return new ArrayList<>();
     }
 
     @Override
@@ -142,7 +155,7 @@ public class FilmDbService implements FilmService {
                 new Director(rs.getInt("id_dir"),rs.getString("name")),id);
         if(!directors.isEmpty()) {
             return new HashSet<>(directors);
-        } else return null;
+        } else return new HashSet<>();
     }
 
     @Override
