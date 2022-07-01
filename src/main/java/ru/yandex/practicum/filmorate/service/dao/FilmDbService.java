@@ -130,6 +130,7 @@ public class FilmDbService implements FilmService {
     public List<Film> findCommonFilms(int userId, int friendId) {
         Set<Film> userFilms = filmStorage.getUserLikedFilms(userId);
         Set<Film> friendFilms = filmStorage.getUserLikedFilms(friendId);
+        log.info("Запрошены общие фильмы пользователей id = {} и id = {}", userId, friendId);
         if (userFilms.size() >= friendFilms.size()) {
             return findCommonInSet(userFilms, friendFilms);
         } else {
@@ -140,6 +141,7 @@ public class FilmDbService implements FilmService {
     private List<Film> findCommonInSet(Set<Film> set1, Set<Film> set2) {
         List<Film> commonList = new ArrayList<>();
         commonList = set1.stream().filter(set2::contains).collect(Collectors.toList());
+
         Collections.sort(commonList, new Comparator<Film>() {
             @Override
             public int compare(Film o1, Film o2) {
