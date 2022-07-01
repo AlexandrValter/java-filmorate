@@ -58,8 +58,8 @@ public class FilmDbStorage implements FilmStorage {
                 film.getReleaseDate(),
                 film.getDuration(),
                 film.getMpa().getId());
-        String sqlDel = "DELETE FROM film_genre WHERE film_id = ?;";
-        jdbcTemplate.update(sqlDel, film.getId());
+        String sqlDel = "DELETE FROM film_genre WHERE film_id = ?;DELETE FROM DIRECTORS_FILMS_LINK WHERE ID_FILM = ?;";
+        jdbcTemplate.update(sqlDel, film.getId(),film.getId());
         return film;
     }
 
