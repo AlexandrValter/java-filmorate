@@ -61,7 +61,7 @@ public class FilmController {
         filmService.deleteFilm(filmId);
     }
     @GetMapping("/common")
-    public Set<Film> findCommonFilms(@RequestParam int userId,@RequestParam int friendId){
+    public List<Film> findCommonFilms(@RequestParam int userId,@RequestParam int friendId){
         return filmService.findCommonFilms(userId,friendId);
     }
 

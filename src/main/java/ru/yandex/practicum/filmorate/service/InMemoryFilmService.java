@@ -118,7 +118,7 @@ public class InMemoryFilmService implements FilmService{
     }
 
     @Override
-    public Set<Film> findCommonFilms(int userId, int friendId) {
+    public List<Film> findCommonFilms(int userId, int friendId) {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

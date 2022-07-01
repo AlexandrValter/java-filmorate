@@ -3,16 +3,12 @@ package ru.yandex.practicum.filmorate.service.dao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.*;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -83,8 +79,6 @@ public class FilmDbService implements FilmService {
     @Override
     public Film getFilm(int id) {
         Film film = filmStorage.getFilm(id);
-        film.setMpa(getFilmMpa(id));
-        film.setGenres(getFilmGenres(id));
         log.info("Запрошен фильм id = {}", film.getId());
         return film;
     }
@@ -97,7 +91,7 @@ public class FilmDbService implements FilmService {
     @Override
     public List<Film> popularFilms(int count) {
         List<Film> films = filmStorage.getPopularFilms(count);
-        setMpaAndGenre(films);
+        //  setMpaAndGenre(films);
         log.info("Запрошен список популярных фильмов, количество запрошенных фильмов = {}", count);
         return films;
     }
@@ -114,19 +108,6 @@ public class FilmDbService implements FilmService {
         return genreDao.getGenre(id);
     }
 
-    private TreeSet<Genre> getFilmGenres(int id) {
-        String sql = "SELECT fg.genre_id, g.name " +
-                "FROM film_genre AS fg " +
-                "LEFT OUTER JOIN genres AS g ON fg.genre_id = g.genre_id " +
-                "WHERE fg.film_id=?;";
-        List<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) ->
-                new Genre(rs.getInt("genre_id"), rs.getString("name")), id);
-        if (!genres.isEmpty()) {
-            return new TreeSet<>(genres);
-        } else {
-            return null;
-        }
-    }
 
     @Override
     public List<Mpa> getAllMpa() {
@@ -146,29 +127,28 @@ public class FilmDbService implements FilmService {
     }
 
     @Override
-    public Set<Film> findCommonFilms(int userId, int friendId) {
+    public List<Film> findCommonFilms(int userId, int friendId) {
         Set<Film> userFilms = filmStorage.getUserLikedFilms(userId);
         Set<Film> friendFilms = filmStorage.getUserLikedFilms(friendId);
-        userFilms.forEach(film->{
-            film.setMpa(getFilmMpa(film.getId()));
-            film.setGenres(getFilmGenres(film.getId()));
-        });
-        return Set.copyOf(userFilms.stream().filter(friendFilms::contains).collect(Collectors.toList()));
-    }
-
-    private Mpa getFilmMpa(int id) {
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
-                "SELECT f.id_mpa, mr.meaning_mpa " +
-                        "FROM films AS f " +
-                        "LEFT OUTER JOIN mpa_rating AS mr ON f.id_mpa = mr.id_mpa_rating " +
-                        "WHERE f.id=?;", id);
-        if (mpaRows.next()) {
-            Mpa mpa = new Mpa(mpaRows.getInt("id_mpa"), mpaRows.getString("meaning_mpa"));
-            return mpa;
+        if (userFilms.size() >= friendFilms.size()) {
+            return findCommonInSet(userFilms, friendFilms);
         } else {
-            return null;
+            return findCommonInSet(friendFilms, userFilms);
         }
     }
+
+    private List<Film> findCommonInSet(Set<Film> set1, Set<Film> set2) {
+        List<Film> commonList = new ArrayList<>();
+        commonList = set1.stream().filter(set2::contains).collect(Collectors.toList());
+        Collections.sort(commonList, new Comparator<Film>() {
+            @Override
+            public int compare(Film o1, Film o2) {
+                return o1.getRate()-o2.getRate();
+            }
+        });
+        return commonList;
+    }
+
 
     private void fillingGenres(Film film) {
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
@@ -179,12 +159,4 @@ public class FilmDbService implements FilmService {
         }
     }
 
-    private void setMpaAndGenre(Collection<Film> films) {
-        if (!films.isEmpty()) {
-            for (Film film : films) {
-                film.setGenres(getFilmGenres(film.getId()));
-                film.setMpa(getFilmMpa(film.getId()));
-            }
-        }
-    }
 }

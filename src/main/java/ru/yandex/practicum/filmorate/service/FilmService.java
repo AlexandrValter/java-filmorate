@@ -34,5 +34,5 @@ public interface FilmService {
 
     void deleteFilm(int filmId);
 
-    Set<Film> findCommonFilms(int userId, int friendId);
+    List<Film> findCommonFilms(int userId, int friendId);
 }
