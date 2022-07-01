@@ -46,6 +46,7 @@ public class FilmDbService implements FilmService {
     public Film addFilm(Film film) {
         filmStorage.addFilm(film);
         fillingGenres(film);
+        fillingDirectors(film);
         log.info("В базу добавлен новый фильм id = {}", film.getId());
         return film;
     }
@@ -64,6 +65,7 @@ public class FilmDbService implements FilmService {
         if (film.getId() != null && getFilm(film.getId()) != null) {
             filmStorage.addOrUpdateFilm(film);
             fillingGenres(film);
+            fillingDirectors(film);
             log.info("Обновлена информация о фильме id = {}", film.getId());
             return film;
         } else {

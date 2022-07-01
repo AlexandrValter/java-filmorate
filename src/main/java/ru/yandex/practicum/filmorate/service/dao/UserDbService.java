@@ -41,13 +41,9 @@ public class UserDbService implements UserService {
         this.userStorage = userStorage;
         this.recommendationHandler = recommendationHandler;
         this.feedDao = feedDao;
-
-    @Autowired
-    public UserDbService(JdbcTemplate jdbcTemplate,
-                         @Qualifier("UserDbStorage") UserStorage userStorage) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.userStorage = userStorage;
     }
+
+
 
     @Override
     public User addUser(User user) {
