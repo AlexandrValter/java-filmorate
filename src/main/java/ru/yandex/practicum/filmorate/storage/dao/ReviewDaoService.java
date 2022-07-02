@@ -37,7 +37,7 @@ public class ReviewDaoService implements ReviewDbService {
                 .collect(Collectors.toList());
     }
 
-    public void changeUseful(Integer id, Integer num){
+    private void changeUseful(Integer id, Integer num){
         String sql = "UPDATE reviews SET useful = useful + ? WHERE id_review = ?";
         jdbcTemplate.update(sql, num, id);
     }

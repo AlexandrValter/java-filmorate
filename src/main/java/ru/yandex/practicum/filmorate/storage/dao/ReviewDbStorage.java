@@ -82,7 +82,7 @@ public class ReviewDbStorage implements ReviewStorage {
                     review.getIsPositive(),
                     review.getId()
             );
-            return review;
+            return findReviewById(review.getId());
     }
 
     @Override

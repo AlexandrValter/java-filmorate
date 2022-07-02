@@ -87,11 +87,11 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review changeReview(Review review) {
-        if (filmStorage.getFilm(review.getFilmId()) instanceof Film &&
-                userStorage.getUser(review.getUserId()) instanceof User) {
+        if (reviewStorage.findReviewById(review.getId())!=null) {
             log.info("Изменен отзыв id = {}", review.getId());
-            feedDao.addFeed(review.getUserId(), Event.REVIEW, Operation.UPDATE, review.getId());
-            return reviewStorage.changeReview(review);
+            Review newReview = reviewStorage.changeReview(review);
+            feedDao.addFeed(newReview.getUserId(), Event.REVIEW, Operation.UPDATE, newReview.getId());
+            return newReview;
         } else {
             throw new ValidationReviewException("Некоректные данные, отзыв не изменен");
         }
@@ -99,7 +99,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public void deleteReview(int idReview) {
-        feedDao.addFeed(findReviewById(idReview).getUserId(), Event.REVIEW, Operation.REMOVE, idReview);
+        feedDao.addFeed(reviewStorage.findReviewById(idReview).getUserId(), Event.REVIEW, Operation.REMOVE, idReview);
         log.info("Удален отзыв id = {}", idReview);
         reviewStorage.deleteReview(idReview);
     }
