@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReviewServiceTest {
 
     private final ReviewDbStorage reviewDbStorage;
-    private final ReviewService reviewService;
+    private final ReviewServiceImpl reviewServiceImpl;
     private final FilmDbStorage filmDbStorage;
     private final UserDbStorage userDbStorage;
 
@@ -76,52 +76,52 @@ class ReviewServiceTest {
 
     @Test
     void getAllReviewByIdFilm() {
-        assertTrue(reviewService.getAllReviewByIdFilm(1, 3).isEmpty());
+        assertTrue(reviewServiceImpl.getAllReviewByIdFilm(1, 3).isEmpty());
         addAllDataForTest();
-        assertTrue(reviewService.getAllReviewByIdFilm(1,3).size() == 2);
+        assertTrue(reviewServiceImpl.getAllReviewByIdFilm(1,3).size() == 2);
     }
 
     @Test
     void addLikeForReview() {
-        assertThrows(NotFoundReviewException.class, () -> reviewService.addLikeForReview(1, 1));
+        assertThrows(NotFoundReviewException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
         addAllDataForTest();
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == 0);
-        reviewService.addLikeForReview(1, 1);
+        reviewServiceImpl.addLikeForReview(1, 1);
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == 1);
-        reviewService.addLikeForReview(1, 2);
+        reviewServiceImpl.addLikeForReview(1, 2);
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == 2);
     }
 
     @Test
     void addDislikeForReview() {
-        assertThrows(NotFoundReviewException.class, () -> reviewService.addLikeForReview(1, 1));
+        assertThrows(NotFoundReviewException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
         addAllDataForTest();
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == 0);
-        reviewService.addDislikeForReview(1, 1);
+        reviewServiceImpl.addDislikeForReview(1, 1);
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == -1);
-        reviewService.addDislikeForReview(1, 2);
+        reviewServiceImpl.addDislikeForReview(1, 2);
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == -2);
     }
 
     @Test
     void deleteLikeForReview() {
-        assertThrows(NotFoundReviewException.class, () -> reviewService.addLikeForReview(1, 1));
+        assertThrows(NotFoundReviewException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
         addAllDataForTest();
-        reviewService.addLikeForReview(1, 1);
-        reviewService.addLikeForReview(1, 2);
+        reviewServiceImpl.addLikeForReview(1, 1);
+        reviewServiceImpl.addLikeForReview(1, 2);
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == 2);
-        reviewService.deleteLikeForReview(1,2);
+        reviewServiceImpl.deleteLikeForReview(1,2);
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == 1);
     }
 
     @Test
     void deleteDislikeForReview() {
-        assertThrows(NotFoundReviewException.class, () -> reviewService.addLikeForReview(1, 1));
+        assertThrows(NotFoundReviewException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
         addAllDataForTest();
-        reviewService.addDislikeForReview(1, 1);
-        reviewService.addDislikeForReview(1, 2);
+        reviewServiceImpl.addDislikeForReview(1, 1);
+        reviewServiceImpl.addDislikeForReview(1, 2);
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == -2);
-        reviewService.deleteDislikeForReview(1,2);
+        reviewServiceImpl.deleteDislikeForReview(1,2);
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == -1);
     }
 }

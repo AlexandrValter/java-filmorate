@@ -23,10 +23,10 @@ class recommendationHandlerWithOutMarksImplTest {
 
     @Test
     @DirtiesContext
-    public void fimdRecommendation() {
-
+    public void findRecommendation() {
         rh.findRecommendation(1);
     }
+
     private void initData(){
         for (int i = 1; i < 15; i++) {
             User user = new User(null,("user-"+i),"user@jjj.ff","", LocalDate.now());

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.review.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
+import ru.yandex.practicum.filmorate.service.ReviewServiceImpl;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
 import javax.validation.Valid;
@@ -15,12 +16,10 @@ import java.util.List;
 @RequestMapping("/reviews")
 public class ReviewController {
 
-    private final ReviewStorage reviewStorage;
     private final ReviewService reviewService;
 
     @Autowired
-    public ReviewController(ReviewStorage reviewStorage, ReviewService reviewService) {
-        this.reviewStorage = reviewStorage;
+    public ReviewController(ReviewService reviewService) {
         this.reviewService = reviewService;
     }
 
@@ -29,29 +28,29 @@ public class ReviewController {
             @RequestParam(value = "filmId", defaultValue = "-1", required = false) int filmId,
             @RequestParam(value = "count", defaultValue = "10", required = false) int count){
         if (filmId == -1){
-            return reviewStorage.getAllReview();
+            return reviewService.getAllReview();
         }
         return reviewService.getAllReviewByIdFilm(filmId, count);
     }
 
     @PostMapping
     public Review addNewReview(@Valid @RequestBody Review review){
-        return reviewStorage.addReview(review);
+        return reviewService.addReview(review);
     }
 
     @PutMapping
     public Review changeReview(@Valid @RequestBody Review review){
-        return reviewStorage.changeReview(review);
+        return reviewService.changeReview(review);
     }
 
     @DeleteMapping("/{idReview}")
     public void deleteReview(@PathVariable("idReview") int idReview){
-        reviewStorage.deleteReview(idReview);
+        reviewService.deleteReview(idReview);
     }
 
     @GetMapping("/{idReview}")
     public Review findReviewById(@PathVariable("idReview") int idReview){
-        return reviewStorage.findReviewById(idReview);
+        return reviewService.findReviewById(idReview);
     }
 
     @PutMapping("/{id}/like/{userId}")

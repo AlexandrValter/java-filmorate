@@ -54,8 +54,6 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review addReview(Review review) {
-        if (filmDbStorage.getFilm(review.getFilmId()) instanceof Film &&
-                userDbStorage.getUser(review.getUserId()) instanceof User){
             Map<String, Object> keys = new SimpleJdbcInsert(jdbcTemplate)
                     .withTableName("reviews")
                     .usingColumns("content", "is_positive", "user_id", "film_id", "useful")
@@ -68,9 +66,6 @@ public class ReviewDbStorage implements ReviewStorage {
                     .getKeys();
             review.setId((Integer) keys.get("id_review"));
             return review;
-        } else {
-            throw new ValidationReviewException("Некоректные данные, отзыв не добавлен");
-        }
     }
 
     @Override
@@ -81,8 +76,6 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review changeReview(Review review) {
-        if (filmDbStorage.getFilm(review.getFilmId()) instanceof Film &&
-                userDbStorage.getUser(review.getUserId()) instanceof User){
             String sql = "UPDATE reviews SET content = ?, is_positive = ? WHERE id_review = ?";
             jdbcTemplate.update(sql,
                     review.getContent(),
@@ -90,9 +83,6 @@ public class ReviewDbStorage implements ReviewStorage {
                     review.getId()
             );
             return review;
-        } else {
-            throw new ValidationReviewException("Некоректные данные, отзыв не изменен");
-        }
     }
 
     @Override

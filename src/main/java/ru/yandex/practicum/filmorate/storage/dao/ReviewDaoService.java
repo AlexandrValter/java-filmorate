@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundReviewException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.review.Review;
+import ru.yandex.practicum.filmorate.storage.ReviewDbService;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 import static ru.yandex.practicum.filmorate.storage.dao.ReviewDbStorage.getReview;
 @Slf4j
 @Component
-public class ReviewDaoService {
+public class ReviewDaoService implements ReviewDbService {
     private final ReviewStorage reviewStorage;
     private final UserDbStorage userDbStorage;
     private final JdbcTemplate jdbcTemplate;
@@ -25,7 +26,7 @@ public class ReviewDaoService {
         this.jdbcTemplate = jdbcTemplate;
         this.userDbStorage = userDbStorage;
     }
-
+    @Override
     public List<Review> getAllReviewByIdFilm(Integer filmId, Integer count){
         String sql = "SELECT * FROM reviews WHERE film_id = ?";
         return jdbcTemplate.query(sql, ((rs, rowNum) -> getReview(rs, rowNum)), filmId).stream()
@@ -41,6 +42,7 @@ public class ReviewDaoService {
         jdbcTemplate.update(sql, num, id);
     }
 
+    @Override
     public void addLikeDislike(Integer id, Integer userId, Integer value){
         if (reviewStorage.findReviewById(id) instanceof Review &&
                 userDbStorage.getUser(userId) instanceof User){
@@ -59,6 +61,7 @@ public class ReviewDaoService {
         }
     }
 
+    @Override
     public void deleteLikeDislike(Integer id, Integer userId, Integer value){
         if (reviewStorage.findReviewById(id) instanceof Review &&
                 userDbStorage.getUser(userId) instanceof User){
