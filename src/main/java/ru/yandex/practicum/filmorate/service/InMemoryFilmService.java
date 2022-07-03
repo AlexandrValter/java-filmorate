@@ -92,6 +92,11 @@ public class InMemoryFilmService implements FilmService{
     }
 
     @Override
+    public List<Film> filmByDirector(Integer idDirector, String param) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
     public List<Genre> getAllGenres() {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
