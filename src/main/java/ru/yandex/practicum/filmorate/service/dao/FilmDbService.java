@@ -93,11 +93,34 @@ public class FilmDbService implements FilmService {
     }
 
     @Override
-    public List<Film> popularFilms(int count) {
-        List<Film> films = filmStorage.getPopularFilms(count);
-        setMpaAndGenre(films);
-        log.info("Запрошен список популярных фильмов, количество запрошенных фильмов = {}", count);
-        return films;
+    public List<Film> popularFilms(int count, int genreId, int year) {
+        if (genreId == -1) {
+            if (year == -1) {
+                List<Film> films = filmStorage.getPopularFilms(count);
+                setMpaAndGenre(films);
+                log.info("Запрошен список популярных фильмов, количество запрошенных фильмов = {}", count);
+                return films;
+            } else {
+                List<Film> films = filmStorage.getPopularFilmsByYear(count, year);
+                setMpaAndGenre(films);
+                log.info("Запрошен список популярных фильмов с годом релиза = {}, количество запрошенных фильмов = {}",
+                        year, count);
+                return films;
+            }
+        } else {
+            if (year == -1) {
+                List<Film> films = filmStorage.getPopularFilmsByGenre(count, genreId);
+                setMpaAndGenre(films);
+                log.info("Запрошен список популярных фильмов с жанром id = {}, количество запрошенных фильмов = {}",
+                        genreId, count);
+                return films;
+            }
+            List<Film> films = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
+            log.info("Запрошен список популярных фильмов с жанром id = {}, годом релиза = {}, " +
+                            "количество запрошенных фильмов = {}", genreId, year, count);
+            setMpaAndGenre(films);
+            return films;
+        }
     }
 
     @Override
