@@ -1,40 +1,28 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.review.Review;
-import ru.yandex.practicum.filmorate.storage.dao.ReviewDaoService;
 
 import java.util.List;
 
-@Slf4j
-@Service
-public class ReviewService {
-    private final ReviewDaoService reviewDaoService;
-    private final static Integer LIKE = 1;
-    private final static Integer DISLIKE = -1;
+public interface ReviewService {
 
-    public ReviewService(ReviewDaoService reviewDaoService) {
-        this.reviewDaoService =reviewDaoService;
-    }
+    List<Review> getAllReviewByIdFilm(Integer filmId, Integer count);
 
-    public List<Review> getAllReviewByIdFilm(Integer filmId, Integer count) {
-        return reviewDaoService.getAllReviewByIdFilm(filmId, count);
-    }
+    void addLikeForReview(Integer id, Integer userId);
 
-    public void addLikeForReview(Integer id, Integer userId){
-        reviewDaoService.addLikeDislike(id, userId, LIKE);
-    }
+    void addDislikeForReview(Integer id, Integer userId);
 
-    public void addDislikeForReview(Integer id, Integer userId){
-        reviewDaoService.addLikeDislike(id, userId, DISLIKE);
-    }
+    void deleteLikeForReview(Integer id, Integer userId);
 
-    public void deleteLikeForReview(Integer id, Integer userId){
-        reviewDaoService.deleteLikeDislike(id, userId, DISLIKE);
-    }
+    void deleteDislikeForReview(Integer id, Integer userId);
 
-    public void deleteDislikeForReview(Integer id, Integer userId) {
-        reviewDaoService.deleteLikeDislike(id, userId, LIKE);
-    }
+    List<Review> getAllReview();
+
+    Review addReview(Review review);
+
+    Review changeReview(Review review);
+
+    void deleteReview(int idReview);
+
+    Review findReviewById(int idReview);
 }

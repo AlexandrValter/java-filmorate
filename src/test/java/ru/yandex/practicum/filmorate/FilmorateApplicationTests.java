@@ -11,6 +11,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.review.Review;
+import ru.yandex.practicum.filmorate.service.ReviewService;
 import ru.yandex.practicum.filmorate.service.dao.FilmDbService;
 import ru.yandex.practicum.filmorate.service.dao.UserDbService;
 import ru.yandex.practicum.filmorate.storage.LikeDao;
@@ -29,6 +31,7 @@ class FilmorateApplicationTests {
 
     private final UserDbService userService;
     private final FilmDbService filmService;
+    private final ReviewService reviewService;
     private final LikeDao likeDao;
 
     private User user1 = new User(
@@ -218,5 +221,21 @@ class FilmorateApplicationTests {
         assertEquals(List.of(film2), filmService.popularFilms(3, 2, -1));
         assertEquals(List.of(film3), filmService.popularFilms(3, 3, 2017));
  develop
+    }
+
+    @Test
+    public void test10_checkFeeds() {
+        userService.addUser(user1);
+        userService.addUser(user2);
+        userService.addUser(user3);
+        userService.addFriends(1, 2);
+        userService.addFriends(1, 3);
+        userService.deleteFriends(1, 3);
+        assertEquals(3, userService.getFeeds(1).size());
+        film1.setMpa(new Mpa(1, "G"));
+        filmService.addFilm(film1);
+        filmService.addLike(1, 1);
+        reviewService.addReview(new Review("Test", true, 1, 1));
+        assertEquals(5, userService.getFeeds(1).size());
     }
 }

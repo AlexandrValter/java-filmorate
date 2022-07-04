@@ -22,12 +22,12 @@ public class FeedDaoImpl implements FeedDao {
     public List<Feed> getFeeds(int id) {
         String sql = "SELECT * FROM feeds WHERE user_id = ?;";
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Feed(
-                rs.getTimestamp("time").toInstant().toEpochMilli(),
+                rs.getInt("event_id"),
                 rs.getInt("user_id"),
+                rs.getInt("entity_id"),
                 Event.valueOf(rs.getString("event_type")),
                 Operation.valueOf(rs.getString("operation")),
-                rs.getInt("event_id"),
-                rs.getInt("entity_id")), id);
+                rs.getTimestamp("time").toInstant().toEpochMilli()),id);
     }
 
     @Override
