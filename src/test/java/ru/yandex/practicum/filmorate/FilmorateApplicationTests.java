@@ -168,7 +168,6 @@ class FilmorateApplicationTests {
     }
 
     @Test
- add-recommendations
     public void test9_checkDeleteUser() {
         userService.addUser(user1);
         userService.addUser(user2);
@@ -182,22 +181,24 @@ class FilmorateApplicationTests {
 
         assertEquals(1, userService.getAllUsers().size());
         assertFalse(userService.getUser(user2.getId()).getFriends().contains(user1.getId()));
-        assertEquals(0,filmService.getFilm(film1.getId()).getLikes().size());
+        assertEquals(0, filmService.getFilm(film1.getId()).getLikes().size());
     }
+
     @Test
-    public void test10_checkDeleteFilm(){
+    public void test10_checkDeleteFilm() {
         film1.setMpa(filmService.getMpa(1));
         userService.addUser(user1);
         filmService.addFilm(film1);
-        filmService.addLike(film1.getId(),user1.getId());
+        filmService.addLike(film1.getId(), user1.getId());
         film1.setGenres(new TreeSet<>(filmService.getAllGenres()));
 
         filmService.deleteFilm(film1.getId());
 
-        assertEquals(0,filmService.getAllFilms().size());
-        assertEquals(0,likeDao.getAllLikes().size());
+        assertEquals(0, filmService.getAllFilms().size());
+        assertEquals(0, likeDao.getAllLikes().size());
+    }
 
-
+    @Test
     public void test11_checkPopularFilms() {
         film1.setMpa(new Mpa(1, "G"));
         Genre genre1 = new Genre(1, "Комедия");
@@ -220,7 +221,6 @@ class FilmorateApplicationTests {
         assertEquals(List.of(film1), filmService.popularFilms(3, -1, 1997));
         assertEquals(List.of(film2), filmService.popularFilms(3, 2, -1));
         assertEquals(List.of(film3), filmService.popularFilms(3, 3, 2017));
- develop
     }
 
     @Test

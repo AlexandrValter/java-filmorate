@@ -27,7 +27,7 @@ public class RecommendationHandlerWithOutMarksImpl implements RecommendationHand
 
     @Override
     public Set<Film> findRecommendation(int userId) {
-        Map<Integer, Set<Integer>> data = initializeData(); // TODO: 28.06.2022  проверить есть ли user
+        Map<Integer, Set<Integer>> data = initializeData();
         Map<Integer, Integer> similarsMap = getSimilarMap(userId, data);
         Set<Integer> userFilmSet = data.get(userId);
         Set<Film> recomSet = new HashSet<>();
@@ -47,7 +47,7 @@ public class RecommendationHandlerWithOutMarksImpl implements RecommendationHand
 
     private Map<Integer, Integer> getSimilarMap(int userId, Map<Integer, Set<Integer>> data) {
         Map<Integer, Integer> similarLikesMap = new HashMap<>();
-        Set userLikesSet = data.get(userId);
+        Set<Integer> userLikesSet = data.get(userId);
         data.keySet().stream()
                 .filter(user -> !similarLikesMap.containsKey(user) && user != userId).forEach(user -> {
                     Integer similar = (int)data.get(user).stream()
