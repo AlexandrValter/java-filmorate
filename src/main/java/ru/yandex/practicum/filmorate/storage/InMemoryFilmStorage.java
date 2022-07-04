@@ -47,6 +47,21 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getPopularFilmsByYear(int count, int year) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByGenre(int count, int genreId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
     public Map<Integer, Film> getFilms() {
         return films;
     }

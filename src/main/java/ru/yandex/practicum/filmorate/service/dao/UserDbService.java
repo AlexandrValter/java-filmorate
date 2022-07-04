@@ -8,11 +8,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Friendship;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.RecommendationHandler;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.FeedDao;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.ResultSet;
@@ -29,14 +28,16 @@ public class UserDbService implements UserService {
     private final JdbcTemplate jdbcTemplate;
     private final UserStorage userStorage;
     private final RecommendationHandler recommendationHandler;
+    private final FeedDao feedDao;
 
     @Autowired
     public UserDbService(JdbcTemplate jdbcTemplate,
                          @Qualifier("UserDbStorage") UserStorage userStorage,
-                         RecommendationHandler recommendationHandler) {
+                         RecommendationHandler recommendationHandler, FeedDao feedDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.userStorage = userStorage;
         this.recommendationHandler = recommendationHandler;
+        this.feedDao = feedDao;
     }
 
     @Override
@@ -70,11 +71,11 @@ public class UserDbService implements UserService {
         return userStorage.getUser(id);
     }
 
-
     @Override
     public void addFriends(int userId, int friendId) {
         if (userStorage.getUser(userId) != null && userStorage.getUser(friendId) != null) {
             log.info("Пользователь id={} добавляет в друзья пользователя id={}", userId, friendId);
+            feedDao.addFeed(userId, Event.FRIEND, Operation.ADD, friendId);
             SqlRowSet friendRows = getFriendship(userId, friendId);
             if (!friendRows.next()) {
                 doNotBilateral(userId, friendId);
@@ -105,6 +106,7 @@ public class UserDbService implements UserService {
             if (friendship.isBilateral()) {
                 doNotBilateral(friendId, userId);
             }
+            feedDao.addFeed(userId, Event.FRIEND, Operation.REMOVE, friendId);
             log.info("Пользователь id={} удалил из друзей пользователя id={}", userId, friendId);
         }
     }
@@ -148,6 +150,15 @@ public class UserDbService implements UserService {
     @Override
     public void deleteUser(int id) {
         userStorage.deleteUser(id);
+    }
+
+    @Override
+    public List<Feed> getFeeds(int id) {
+        if (userStorage.getUser(id) != null) {
+            log.info("Запрошена лента событий пользователя id = {}", id);
+            return feedDao.getFeeds(id);
+        }
+        return null;
     }
 
     private void doNotBilateral(int userId, int friendId) {

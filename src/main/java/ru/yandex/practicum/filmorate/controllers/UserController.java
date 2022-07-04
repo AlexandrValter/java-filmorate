@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -61,12 +62,19 @@ public class UserController {
     public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
         return userService.getCommonFriends(id, otherId);
     }
+
     @GetMapping("/{id}/recommendations")
     public Set<Film> findRecommendation(@PathVariable int id){
         return userService.findRecommendation(id);
     }
+
     @DeleteMapping("/{userId}")
     public  void deleteUser(@PathVariable int userId){
         userService.deleteUser(userId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Feed> getFeeds(@PathVariable int id) {
+        return userService.getFeeds(id);
     }
 }
