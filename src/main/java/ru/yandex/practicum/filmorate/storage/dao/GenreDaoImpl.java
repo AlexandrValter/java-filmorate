@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreDao;
 
 import java.util.List;
+import java.util.TreeSet;
 
 @Component
 public class GenreDaoImpl implements GenreDao {
@@ -41,6 +42,20 @@ public class GenreDaoImpl implements GenreDao {
                     HttpStatus.NOT_FOUND,
                     String.format("Жанр с id %d не найден", id)
             );
+        }
+    }
+    @Override
+    public TreeSet<Genre> getFilmGenres(int id) {
+        String sql = "SELECT fg.genre_id, g.name " +
+                "FROM film_genre AS fg " +
+                "LEFT OUTER JOIN genres AS g ON fg.genre_id = g.genre_id " +
+                "WHERE fg.film_id=?;";
+        List<Genre> genres = jdbcTemplate.query(sql, (rs, rowNum) ->
+                new Genre(rs.getInt("genre_id"), rs.getString("name")), id);
+        if (!genres.isEmpty()) {
+            return new TreeSet<>(genres);
+        } else {
+            return null;
         }
     }
 }

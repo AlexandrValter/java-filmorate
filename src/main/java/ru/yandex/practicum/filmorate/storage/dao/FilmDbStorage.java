@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -7,7 +9,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -16,15 +18,17 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component("FilmDbStorage")
+@Primary
+@RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
+    private final JdbcTemplate jdbcTemplate;    private final LikeDao likeDao;
+    private final MpaDao mpaDao;
+    private final GenreDao genreDao;
+    private final DirectorDao directorDao;
 
-    private final JdbcTemplate jdbcTemplate;
-
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public Film addFilm(Film film) {
@@ -67,18 +71,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilm(int id) {
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM films WHERE id=?;", id);
-        if (filmRows.next()) {
-            return new Film(
-                    filmRows.getInt("id"),
-                    filmRows.getString("name"),
-                    filmRows.getString("description"),
-                    LocalDate.parse(filmRows.getString("release_date")),
-                    filmRows.getInt("duration"));
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format("Фильм с id %d не найден", id));
-        }
+        String sql = "SELECT * FROM films WHERE id=?";
+        return jdbcTemplate.query(sql, this::makeFilm, id).stream().findAny()
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,
+                String.format("Фильм с id %d не найден", id)));
     }
 
     @Override
@@ -101,8 +97,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteFilm(int filmId) {
         String sql = "DELETE FROM FILMS WHERE ID=?";
-        jdbcTemplate.update(sql,ps -> {
-            ps.setInt(1,filmId);
+        jdbcTemplate.update(sql, ps -> {
+            ps.setInt(1, filmId);
         });
     }
 
@@ -158,14 +154,29 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sql, this::makeFilm, genreId, year, count);
     }
 
+    @Override
+    public Set<Film> getUserLikedFilms(int userId) {
+        String sqlUserLiked = "SELECT * FROM FILMS WHERE ID IN(SELECT FILM_ID FROM LIKES WHERE USER_ID =?) ";
+
+        return Set.copyOf(jdbcTemplate.query(sqlUserLiked, this::makeFilm,userId));
+
+    }
+
+
     private Film makeFilm(ResultSet rs, int rowNum) {
         try {
-            return new Film(
+            Film film = new Film(
                     rs.getInt("id"),
                     rs.getString("name"),
                     rs.getString("description"),
                     LocalDate.parse(rs.getString("release_date")),
                     rs.getInt("duration"));
+            film.setMpa(mpaDao.getFilmMpa(film.getId()));
+            film.setGenres(genreDao.getFilmGenres(film.getId()));
+            film.setLikes(likeDao.getFilmLikes(film.getId()));
+            film.setRate(film.getLikes().size());
+            film.setDirectors(directorDao.getFilmDirector(film.getId()));
+            return film;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

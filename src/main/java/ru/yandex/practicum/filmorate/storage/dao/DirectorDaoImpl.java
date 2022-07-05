@@ -10,7 +10,9 @@ import ru.yandex.practicum.filmorate.storage.DirectorDao;
 
 import javax.xml.bind.ValidationException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @Slf4j
@@ -85,5 +87,16 @@ public class DirectorDaoImpl implements DirectorDao {
     public void removeDirector(Integer id) {
         String sql = "DELETE FROM DIRECTORS WHERE ID_DIRECTOR=?";
         jdbcTemplate.update(sql, id);
+    }
+    @Override
+    public Set<Director> getFilmDirector(Integer id){
+        String sql = "SELECT DFL.ID_DIRECTOR id_dir,D.NAME name FROM DIRECTORS_FILMS_LINK DFL "
+                +"LEFT JOIN DIRECTORS D on D.ID_DIRECTOR = DFL.ID_DIRECTOR "
+                + "WHERE  DFL.ID_FILM=?";
+        List<Director> directors = jdbcTemplate.query(sql,(rs, rowNum) ->
+                new Director(rs.getInt("id_dir"),rs.getString("name")),id);
+        if(!directors.isEmpty()) {
+            return new HashSet<>(directors);
+        } else return new HashSet<>();
     }
 }

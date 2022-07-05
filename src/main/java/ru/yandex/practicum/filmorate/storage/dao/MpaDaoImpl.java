@@ -44,4 +44,18 @@ public class MpaDaoImpl implements MpaDao {
             );
         }
     }
+    @Override
+    public Mpa getFilmMpa ( int id){
+        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(
+                "SELECT f.id_mpa, mr.meaning_mpa " +
+                        "FROM films AS f " +
+                        "LEFT OUTER JOIN mpa_rating AS mr ON f.id_mpa = mr.id_mpa_rating " +
+                        "WHERE f.id=?;", id);
+        if (mpaRows.next()) {
+            Mpa mpa = new Mpa(mpaRows.getInt("id_mpa"), mpaRows.getString("meaning_mpa"));
+            return mpa;
+        } else {
+            return null;
+        }
+    }
 }

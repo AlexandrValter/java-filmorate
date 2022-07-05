@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -15,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.review.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 import ru.yandex.practicum.filmorate.service.dao.FilmDbService;
 import ru.yandex.practicum.filmorate.service.dao.UserDbService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.LikeDao;
 
 import java.time.LocalDate;
@@ -31,6 +31,7 @@ class FilmorateApplicationTests {
 
     private final UserDbService userService;
     private final FilmDbService filmService;
+    private final FilmStorage filmStorage;
     private final ReviewService reviewService;
     private final LikeDao likeDao;
 
@@ -141,12 +142,12 @@ class FilmorateApplicationTests {
         filmService.addLike(1, 2);
         filmService.addLike(1, 1);
         filmService.addLike(2, 3);
-        List<Film> films = List.of(film1, film2);
+        List<Film> films = List.of(filmStorage.getFilm(film1.getId()), filmStorage.getFilm(film2.getId()));
         assertEquals(films, filmService.popularFilms(3, -1, -1));
         filmService.deleteLike(1, 1);
         filmService.addLike(2, 1);
         assertNotEquals(films, filmService.popularFilms(3, -1, -1));
-        List<Film> films2 = List.of(film2, film1);
+        List<Film> films2 = List.of(filmStorage.getFilm(film2.getId()), filmStorage.getFilm(film1.getId()));
         assertEquals(films2, filmService.popularFilms(3, -1, -1));
     }
 
@@ -218,13 +219,13 @@ class FilmorateApplicationTests {
         film3.setGenres(new TreeSet<>(List.of(genre3)));
         film3.setMpa(new Mpa(3, "PG-13"));
         filmService.addFilm(film3);
-        assertEquals(List.of(film1), filmService.popularFilms(3, -1, 1997));
-        assertEquals(List.of(film2), filmService.popularFilms(3, 2, -1));
-        assertEquals(List.of(film3), filmService.popularFilms(3, 3, 2017));
+        assertEquals(List.of(filmStorage.getFilm(film1.getId())), filmService.popularFilms(3, -1, 1997));
+        assertEquals(List.of(filmStorage.getFilm(film2.getId())), filmService.popularFilms(3, 2, -1));
+        assertEquals(List.of(filmStorage.getFilm(film3.getId())), filmService.popularFilms(3, 3, 2017));
     }
 
     @Test
-    public void test10_checkFeeds() {
+    public void test12_checkFeeds() {
         userService.addUser(user1);
         userService.addUser(user2);
         userService.addUser(user3);
@@ -238,4 +239,26 @@ class FilmorateApplicationTests {
         reviewService.addReview(new Review("Test", true, 1, 1));
         assertEquals(5, userService.getFeeds(1).size());
     }
+
+    @Test
+    public void test13_checkCommonFilms() {
+        Mpa mpa = filmService.getMpa(1);
+        for (int i = 1; i < 5; i++) {
+            Film film = new Film(i, ("Film" + 1), "", LocalDate.now(), 50);
+            film.setMpa(mpa);
+            filmService.addFilm(film);
+        }
+        userService.addUser(user1);
+        userService.addUser(user2);
+        filmService.addLike(1, user1.getId());
+        filmService.addLike(2, user1.getId());
+        filmService.addLike(4, user1.getId());
+        filmService.addLike(1, user2.getId());
+        filmService.addLike(4, user2.getId());
+
+        assertEquals(2, filmService.findCommonFilms(1, 2).size());
+        assertTrue(filmService.findCommonFilms(1, 2).contains(filmStorage.getFilm(1)) &&
+                filmService.findCommonFilms(1, 2).contains(filmStorage.getFilm(4)));
+    }
+
 }

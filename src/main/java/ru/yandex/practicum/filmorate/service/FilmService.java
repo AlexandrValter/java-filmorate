@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface FilmService {
 
@@ -34,4 +35,6 @@ public interface FilmService {
     Mpa getMpa(int id);
 
     void deleteFilm(int filmId);
+
+    List<Film> findCommonFilms(int userId, int friendId);
 }
