@@ -23,6 +23,8 @@ public interface FilmService {
 
     Collection<Film> getAllFilms();
 
+    List<Film> filmByDirector(Integer idDirector, String param);
+
     List<Genre> getAllGenres();
 
     Genre getGenre(int id);

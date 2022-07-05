@@ -9,9 +9,7 @@ import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.*;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 @Slf4j
 @Service("FilmDbService")
@@ -22,25 +20,29 @@ public class FilmDbService implements FilmService {
     private final GenreDao genreDao;
     private final MpaDao mpaDao;
     private final FeedDao feedDao;
+    private final DirectorDao directorDao;
 
     public FilmDbService(JdbcTemplate jdbcTemplate,
                          @Qualifier("FilmDbStorage") FilmStorage filmStorage,
                          @Qualifier("UserDbStorage") UserStorage userStorage,
                          GenreDao genreDao,
                          MpaDao mpaDao,
-                         FeedDao feedDao) {
+                         FeedDao feedDao,
+                         DirectorDao directorDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreDao = genreDao;
         this.mpaDao = mpaDao;
         this.feedDao = feedDao;
+        this.directorDao = directorDao;
     }
 
     @Override
     public Film addFilm(Film film) {
         filmStorage.addFilm(film);
         fillingGenres(film);
+        fillingDirectors(film);
         log.info("В базу добавлен новый фильм id = {}", film.getId());
         return film;
     }
@@ -60,6 +62,7 @@ public class FilmDbService implements FilmService {
         if (film.getId() != null && getFilm(film.getId()) != null) {
             filmStorage.addOrUpdateFilm(film);
             fillingGenres(film);
+            fillingDirectors(film);
             log.info("Обновлена информация о фильме id = {}", film.getId());
             return film;
         } else {
@@ -83,13 +86,19 @@ public class FilmDbService implements FilmService {
         Film film = filmStorage.getFilm(id);
         film.setMpa(getFilmMpa(id));
         film.setGenres(getFilmGenres(id));
+        film.setDirectors(getFilmDirector(id));
         log.info("Запрошен фильм id = {}", film.getId());
         return film;
     }
 
     @Override
     public Collection<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        Collection<Film> films = filmStorage.getAllFilms();
+        films
+                .forEach(film -> {film.setMpa(getFilmMpa(film.getId()));
+                    film.setGenres(getFilmGenres(film.getId()));
+                    film.setDirectors(getFilmDirector(film.getId()));});
+        return films;
     }
 
     @Override
@@ -121,6 +130,19 @@ public class FilmDbService implements FilmService {
             setMpaAndGenre(films);
             return films;
         }
+    }
+
+    @Override
+    public List<Film> filmByDirector(Integer idDirector, String param) {
+        if(directorDao.getDirector(idDirector) != null) {
+            List<Film> films = filmStorage.getFilmsByDirector(idDirector, param);
+            films.forEach(film -> {film.setMpa(getFilmMpa(film.getId()));
+                film.setGenres(getFilmGenres(film.getId()));
+                film.setDirectors(getFilmDirector(film.getId()));});
+            log.info("Запрошены фильмы режиссера id={}", idDirector);
+            return films;
+        }
+        return new ArrayList<>();
     }
 
     @Override
@@ -180,11 +202,32 @@ public class FilmDbService implements FilmService {
         }
     }
 
+    private Set<Director> getFilmDirector(Integer id){
+        String sql = "SELECT DFL.ID_DIRECTOR id_dir,D.NAME name FROM DIRECTORS_FILMS_LINK DFL "
+                +"LEFT JOIN DIRECTORS D on D.ID_DIRECTOR = DFL.ID_DIRECTOR "
+                + "WHERE  DFL.ID_FILM=?";
+        List<Director> directors = jdbcTemplate.query(sql,(rs, rowNum) ->
+                new Director(rs.getInt("id_dir"),rs.getString("name")),id);
+        if(!directors.isEmpty()) {
+            return new HashSet<>(directors);
+        } else return new HashSet<>();
+    }
+
     private void fillingGenres(Film film) {
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             for (Genre genre : film.getGenres()) {
                 String sql = "MERGE INTO film_genre (film_id, genre_id) KEY (film_id, genre_id) VALUES (?, ?);";
                 jdbcTemplate.update(sql, film.getId(), genre.getId());
+            }
+        }
+    }
+
+    private void fillingDirectors(Film film) {
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            for (Director director : film.getDirectors()) {
+                String sql = "MERGE INTO DIRECTORS_FILMS_LINK(ID_DIRECTOR, ID_FILM) "
+                        + "KEY (ID_DIRECTOR,ID_FILM) VALUES ( ?,? )";
+                jdbcTemplate.update(sql, director.getId(), film.getId());
             }
         }
     }
