@@ -174,6 +174,22 @@ public class FilmDbService implements FilmService {
         }
     }
 
+    @Override
+    public List<Film> searchByTitleOrDirector(String query, List<ByEnum> by) {
+        List<Film> searchedFilms;
+        if (by.contains(ByEnum.TITLE) && !by.contains(ByEnum.DIRECTOR)) {
+            log.info("Запрошен поиск по тексту {} среди названий фильмов", query);
+            return filmStorage.searchByTitle(query);
+        } else if (by.contains(ByEnum.DIRECTOR) && !by.contains(ByEnum.TITLE)) {
+            log.info("Запрошен поиск по тексту {} среди режиссеров фильмов", query);
+            return filmStorage.searchByDirector(query);
+        } else if (by.contains(ByEnum.TITLE) && by.contains(ByEnum.DIRECTOR)) {
+            log.info("Запрошен поиск по тексту {} среди названий и режиссеров фильмов", query);
+            return filmStorage.searchByTitleAndDirector(query);
+        }
+        return null;
+    }
+
     private List<Film> findCommonInSet(Set<Film> set1, Set<Film> set2) {
         List<Film> commonList = new ArrayList<>();
         commonList = set1.stream().filter(set2::contains).collect(Collectors.toList());
