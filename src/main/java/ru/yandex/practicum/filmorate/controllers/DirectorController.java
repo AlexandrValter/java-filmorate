@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.storage.DirectorDao;
 
 import java.util.List;
@@ -10,34 +11,34 @@ import java.util.List;
 @RestController
 @RequestMapping("/directors")
 public class DirectorController {
-    private DirectorDao directorDao;
+    private DirectorService directorService;
 
-    public DirectorController(DirectorDao directorDao) {
-        this.directorDao = directorDao;
+    public DirectorController(DirectorService directorService) {
+        this.directorService = directorService;
     }
 
     @GetMapping("/{id}")
     public Director getDirector(@PathVariable Integer id){
-        return directorDao.getDirector(id);
+        return directorService.getDirector(id);
     }
 
     @GetMapping
     public List<Director> getAll(){
-        return  directorDao.getAll();
+        return  directorService.getAll();
     }
 
     @DeleteMapping("/{id}")
     public void removeDirector(@PathVariable Integer id){
-        directorDao.removeDirector(id);
+        directorService.removeDirector(id);
     }
 
     @PostMapping
     public Director addDirector(@RequestBody Director director){
-        return directorDao.addDirector(director);
+        return directorService.addDirector(director);
     }
 
     @PutMapping
     public Director updateDirector(@RequestBody Director director){
-        return directorDao.updateDirector(director);
+        return directorService.updateDirector(director);
     }
 }

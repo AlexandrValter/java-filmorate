@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 public class DirectorDaoImpl implements DirectorDao {
     private final JdbcTemplate jdbcTemplate;
 
@@ -62,6 +64,7 @@ public class DirectorDaoImpl implements DirectorDao {
         if (maxId.next()) {
             director.setId(maxId.getInt("max"));
         }
+        log.info("добавлен режиссер id={}",director.getId());
         return director;
     }
 
