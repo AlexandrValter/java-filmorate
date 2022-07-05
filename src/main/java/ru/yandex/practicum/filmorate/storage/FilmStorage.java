@@ -24,4 +24,12 @@ public interface FilmStorage {
     void deleteFilm(int filmId);
 
     Set<Film> getUserLikedFilms(int userId);
+
+    List<Film> getPopularFilmsByYear(int count, int year);
+
+    List<Film> getPopularFilmsByGenre(int count, int genreId);
+
+    List<Film> getFilmsByDirector(Integer idDirector, String param);
+
+    List<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year);
 }

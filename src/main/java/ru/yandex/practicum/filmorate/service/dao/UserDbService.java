@@ -143,6 +143,7 @@ public class UserDbService implements UserService {
 
     @Override
     public Set<Film> findRecommendation(int id) {
+        log.info("Запрошены рекомендации для пользователя id = {}", id);
         return recommendationHandler.findRecommendation(id);
     }
 

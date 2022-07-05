@@ -64,7 +64,7 @@ public class InMemoryFilmService implements FilmService{
         }
     }
 
-    public List<Film> popularFilms(int count) {
+    public List<Film> popularFilms(int count, int genreId, int year) {
         return filmStorage.getAllFilms().stream()
                 .sorted(Comparator.comparingInt(Film::getRate).reversed())
                 .distinct()
@@ -89,6 +89,11 @@ public class InMemoryFilmService implements FilmService{
 
     @Override
     public Collection<Film> getAllFilms() {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> filmByDirector(Integer idDirector, String param) {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
