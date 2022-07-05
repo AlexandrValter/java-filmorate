@@ -90,12 +90,8 @@ public class FilmDbService implements FilmService {
 
     @Override
     public Collection<Film> getAllFilms() {
-        Collection<Film> films = filmStorage.getAllFilms();
-        films
-                .forEach(film -> {film.setMpa(getFilmMpa(film.getId()));
-                    film.setGenres(getFilmGenres(film.getId()));
-                    film.setDirectors(getFilmDirector(film.getId()));});
-        return films;
+        return filmStorage.getAllFilms();
+
     }
 
     @Override
@@ -103,12 +99,11 @@ public class FilmDbService implements FilmService {
         if (genreId == -1) {
             if (year == -1) {
                 List<Film> films = filmStorage.getPopularFilms(count);
-        //  setMpaAndGenre(films);
+
                 log.info("Запрошен список популярных фильмов, количество запрошенных фильмов = {}", count);
                 return films;
             } else {
                 List<Film> films = filmStorage.getPopularFilmsByYear(count, year);
-                setMpaAndGenre(films);
                 log.info("Запрошен список популярных фильмов с годом релиза = {}, количество запрошенных фильмов = {}",
                         year, count);
                 return films;
@@ -116,7 +111,6 @@ public class FilmDbService implements FilmService {
         } else {
             if (year == -1) {
                 List<Film> films = filmStorage.getPopularFilmsByGenre(count, genreId);
-                setMpaAndGenre(films);
                 log.info("Запрошен список популярных фильмов с жанром id = {}, количество запрошенных фильмов = {}",
                         genreId, count);
                 return films;
@@ -124,7 +118,6 @@ public class FilmDbService implements FilmService {
             List<Film> films = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
             log.info("Запрошен список популярных фильмов с жанром id = {}, годом релиза = {}, " +
                             "количество запрошенных фильмов = {}", genreId, year, count);
-            setMpaAndGenre(films);
             return films;
         }
     }
@@ -133,9 +126,6 @@ public class FilmDbService implements FilmService {
     public List<Film> filmByDirector(Integer idDirector, String param) {
         if(directorDao.getDirector(idDirector) != null) {
             List<Film> films = filmStorage.getFilmsByDirector(idDirector, param);
-            films.forEach(film -> {film.setMpa(getFilmMpa(film.getId()));
-                film.setGenres(getFilmGenres(film.getId()));
-                film.setDirectors(getFilmDirector(film.getId()));});
             log.info("Запрошены фильмы режиссера id={}", idDirector);
             return films;
         }
@@ -198,16 +188,7 @@ public class FilmDbService implements FilmService {
     }
 
 
-    private Set<Director> getFilmDirector(Integer id){
-        String sql = "SELECT DFL.ID_DIRECTOR id_dir,D.NAME name FROM DIRECTORS_FILMS_LINK DFL "
-                +"LEFT JOIN DIRECTORS D on D.ID_DIRECTOR = DFL.ID_DIRECTOR "
-                + "WHERE  DFL.ID_FILM=?";
-        List<Director> directors = jdbcTemplate.query(sql,(rs, rowNum) ->
-                new Director(rs.getInt("id_dir"),rs.getString("name")),id);
-        if(!directors.isEmpty()) {
-            return new HashSet<>(directors);
-        } else return new HashSet<>();
-    }
+
 
     private void fillingGenres(Film film) {
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
@@ -224,15 +205,6 @@ public class FilmDbService implements FilmService {
                 String sql = "MERGE INTO DIRECTORS_FILMS_LINK(ID_DIRECTOR, ID_FILM) "
                         + "KEY (ID_DIRECTOR,ID_FILM) VALUES ( ?,? )";
                 jdbcTemplate.update(sql, director.getId(), film.getId());
-            }
-        }
-    }
-
-    private void setMpaAndGenre(Collection<Film> films) {
-        if (!films.isEmpty()) {
-            for (Film film : films) {
-                film.setGenres(getFilmGenres(film.getId()));
-                film.setMpa(getFilmMpa(film.getId()));
             }
         }
     }

@@ -9,10 +9,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreDao;
-import ru.yandex.practicum.filmorate.storage.LikeDao;
-import ru.yandex.practicum.filmorate.storage.MpaDao;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -30,6 +27,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;    private final LikeDao likeDao;
     private final MpaDao mpaDao;
     private final GenreDao genreDao;
+    private final DirectorDao directorDao;
 
 
     @Override
@@ -164,6 +162,7 @@ public class FilmDbStorage implements FilmStorage {
 
     }
 
+
     private Film makeFilm(ResultSet rs, int rowNum) {
         try {
             Film film = new Film(
@@ -175,7 +174,8 @@ public class FilmDbStorage implements FilmStorage {
             film.setMpa(mpaDao.getFilmMpa(film.getId()));
             film.setGenres(genreDao.getFilmGenres(film.getId()));
             film.setLikes(likeDao.getFilmLikes(film.getId()));
-            film.setRate(film.getLikes().size()); // TODO: 01.07.2022 если делать оценки незабыть
+            film.setRate(film.getLikes().size());
+            film.setDirectors(directorDao.getFilmDirector(film.getId()));
             return film;
         } catch (SQLException e) {
             throw new RuntimeException(e);
