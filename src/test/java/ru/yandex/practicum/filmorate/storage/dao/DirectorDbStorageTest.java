@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import ru.yandex.practicum.filmorate.model.ByEnum;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -14,7 +15,9 @@ import ru.yandex.practicum.filmorate.service.dao.FilmDbService;
 import ru.yandex.practicum.filmorate.storage.DirectorDao;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,6 +46,11 @@ public class DirectorDbStorageTest {
             "film2",
             LocalDate.of(2000, 1, 1),
             120);
+
+    private Film film3 = new Film(3,
+            "Same name dir",
+            "description",
+            LocalDate.of(2001, 2,3), 180);
     @Test
     public void addDirectorGetAllTest1(){
         assertTrue(directorDao.getAll().isEmpty());
@@ -98,4 +106,68 @@ public class DirectorDbStorageTest {
         assertEquals(1,filmDbService.filmByDirector(1,"year").size(),"expected 1");
     }
 
+    @Test
+    public void searchByTitleOnlyTest() {
+        Set<Director> directors = new HashSet<>();
+        directors.add(director1);
+        directors.add(director2);
+        directors.add(director3);
+        film1.setDirectors(directors);
+        film2.setDirectors(directors);
+        film3.setDirectors(directors);
+        film1.setMpa(mpa);
+        film2.setMpa(mpa);
+        film3.setMpa(mpa);
+        directorDao.addDirector(director1);
+        directorDao.addDirector(director2);
+        directorDao.addDirector(director3);
+        filmDbService.addFilm(film1);
+        filmDbService.addFilm(film2);
+        filmDbService.addFilm(film3);
+        assertEquals(2,filmDbService.searchByTitleOrDirector("film", List.of(ByEnum.TITLE)).size(),
+                "expected 2");
+    }
+
+    @Test
+    public void searchByDirectorOnlyTest() {
+        Set<Director> directors = new HashSet<>();
+        directors.add(director1);
+        directors.add(director2);
+        directors.add(director3);
+        film1.setDirectors(directors);
+        film2.setDirectors(directors);
+        film3.setDirectors(directors);
+        film1.setMpa(mpa);
+        film2.setMpa(mpa);
+        film3.setMpa(mpa);
+        directorDao.addDirector(director1);
+        directorDao.addDirector(director2);
+        directorDao.addDirector(director3);
+        filmDbService.addFilm(film1);
+        filmDbService.addFilm(film2);
+        filmDbService.addFilm(film3);
+        assertEquals(3,filmDbService.searchByTitleOrDirector("Dir", List.of(ByEnum.DIRECTOR)).size(),
+                "expected 3");
+    }
+    @Test
+    public void searchByTitleOrDirectorTest() {
+        Set<Director> directors = new HashSet<>();
+        directors.add(director1);
+        directors.add(director2);
+        directors.add(director3);
+        film1.setDirectors(directors);
+        film2.setDirectors(directors);
+        film3.setDirectors(directors);
+        film1.setMpa(mpa);
+        film2.setMpa(mpa);
+        film3.setMpa(mpa);
+        directorDao.addDirector(director1);
+        directorDao.addDirector(director2);
+        directorDao.addDirector(director3);
+        filmDbService.addFilm(film1);
+        filmDbService.addFilm(film2);
+        filmDbService.addFilm(film3);
+        assertEquals(1,filmDbService.searchByTitleOrDirector("dir",
+                        List.of(ByEnum.DIRECTOR, ByEnum.TITLE)).size(),"expected 1");
+    }
 }

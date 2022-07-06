@@ -176,7 +176,6 @@ public class FilmDbService implements FilmService {
 
     @Override
     public List<Film> searchByTitleOrDirector(String query, List<ByEnum> by) {
-        List<Film> searchedFilms;
         if (by.contains(ByEnum.TITLE) && !by.contains(ByEnum.DIRECTOR)) {
             log.info("Запрошен поиск по тексту {} среди названий фильмов", query);
             return filmStorage.searchByTitle(query);

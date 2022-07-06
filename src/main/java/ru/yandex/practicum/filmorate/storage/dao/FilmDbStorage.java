@@ -159,7 +159,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, COUNT (l.user_id) " +
                 "FROM films AS f " +
                 "LEFT JOIN likes AS l ON f.id = l.film_id " +
-                "WHERE f.name LIKE '% ? %' " +
+                "WHERE f.name LIKE '%' || ? || '%' " +
                 "GROUP BY f.id " +
                 "ORDER BY COUNT (l.user_id) DESC; ";
         return jdbcTemplate.query(sql, this::makeFilm, query);
@@ -172,7 +172,7 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT JOIN likes AS l ON f.id = l.film_id " +
                 "LEFT JOIN DIRECTORS_FILMS_LINK AS dfl ON f.id = dfl.ID_FILM " +
                 "JOIN DIRECTORS AS dr ON dfl.ID_DIRECTOR = dr.ID_DIRECTOR " +
-                "WHERE dr.NAME LIKE '% ? %' " +
+                "WHERE dr.NAME LIKE '%' || ? || '%' " +
                 "GROUP BY f.id " +
                 "ORDER BY COUNT (l.user_id) DESC; ";
         return jdbcTemplate.query(sql, this::makeFilm, query);
@@ -185,10 +185,10 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT JOIN likes AS l ON f.id = l.film_id " +
                 "LEFT JOIN DIRECTORS_FILMS_LINK AS dfl ON f.id = dfl.ID_FILM " +
                 "JOIN DIRECTORS AS dr ON dfl.ID_DIRECTOR = dr.ID_DIRECTOR " +
-                "WHERE (f.name AND dr.NAME) LIKE '% ? %' " +
+                "WHERE f.name LIKE '%' || ? || '%' OR dr.NAME LIKE '%' || ? || '%' " +
                 "GROUP BY f.id " +
                 "ORDER BY COUNT (l.user_id) DESC;";
-        return jdbcTemplate.query(sql, this::makeFilm, query);
+        return jdbcTemplate.query(sql, this::makeFilm, query, query);
     }
 
     @Override
