@@ -176,13 +176,13 @@ public class FilmDbService implements FilmService {
 
     @Override
     public List<Film> searchByTitleOrDirector(String query, List<ByEnum> by) {
-        if (by.contains(ByEnum.TITLE) && !by.contains(ByEnum.DIRECTOR)) {
+        if (by.contains(ByEnum.title) && !by.contains(ByEnum.director)) {
             log.info("Запрошен поиск по тексту {} среди названий фильмов", query);
             return filmStorage.searchByTitle(query);
-        } else if (by.contains(ByEnum.DIRECTOR) && !by.contains(ByEnum.TITLE)) {
+        } else if (by.contains(ByEnum.director) && !by.contains(ByEnum.director)) {
             log.info("Запрошен поиск по тексту {} среди режиссеров фильмов", query);
             return filmStorage.searchByDirector(query);
-        } else if (by.contains(ByEnum.TITLE) && by.contains(ByEnum.DIRECTOR)) {
+        } else if (by.contains(ByEnum.title) && by.contains(ByEnum.director)) {
             log.info("Запрошен поиск по тексту {} среди названий и режиссеров фильмов", query);
             return filmStorage.searchByTitleAndDirector(query);
         }
