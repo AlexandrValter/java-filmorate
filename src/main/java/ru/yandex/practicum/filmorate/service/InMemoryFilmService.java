@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.ByEnum;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -124,6 +125,11 @@ public class InMemoryFilmService implements FilmService{
 
     @Override
     public List<Film> findCommonFilms(int userId, int friendId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> searchByTitleOrDirector(String query, List<ByEnum> by) {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

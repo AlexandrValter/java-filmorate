@@ -131,7 +131,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getFilmsByDirector(Integer idDirector, String param) {
         String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, COUNT (l.user_id) " +
                 "FROM films AS f LEFT JOIN likes AS l ON f.id = l.film_id " +
-                "WHERE f.ID IN (SELECT ID_FILM FROM DIRECTORS_FILMS_LINK WHERE ID_DIRECTOR=?)" +
+                "WHERE f.ID IN (SELECT ID_FILM FROM DIRECTORS_FILMS_LINK WHERE ID_DIRECTOR=?) " +
                 "GROUP BY f.id ";
         if (param.equals("likes")) {
             sql += "ORDER BY COUNT (l.user_id) DESC";
@@ -152,6 +152,43 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY COUNT (l.user_id) DESC " +
                 "LIMIT ?;";
         return jdbcTemplate.query(sql, this::makeFilm, genreId, year, count);
+    }
+
+    @Override
+    public List<Film> searchByTitle(String query) {
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, COUNT (l.user_id) " +
+                "FROM films AS f " +
+                "LEFT JOIN likes AS l ON f.id = l.film_id " +
+                "WHERE LOWER(f.name) LIKE LOWER('%' || ? || '%') " +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT (l.user_id) DESC; ";
+        return jdbcTemplate.query(sql, this::makeFilm, query);
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, COUNT (l.user_id) " +
+                "FROM films AS f " +
+                "LEFT JOIN likes AS l ON f.id = l.film_id " +
+                "LEFT JOIN DIRECTORS_FILMS_LINK AS dfl ON f.id = dfl.ID_FILM " +
+                "LEFT JOIN DIRECTORS AS dr ON dfl.ID_DIRECTOR = dr.ID_DIRECTOR " +
+                "WHERE LOWER(dr.NAME) LIKE LOWER('%' || ? || '%') " +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT (l.user_id) DESC; ";
+        return jdbcTemplate.query(sql, this::makeFilm, query);
+    }
+
+    @Override
+    public List<Film> searchByTitleAndDirector(String query) {
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, COUNT (l.user_id) " +
+                "FROM films AS f " +
+                "LEFT JOIN likes AS l ON f.id = l.film_id " +
+                "LEFT JOIN DIRECTORS_FILMS_LINK AS dfl ON f.id = dfl.ID_FILM " +
+                "LEFT JOIN DIRECTORS AS dr ON dfl.ID_DIRECTOR = dr.ID_DIRECTOR " +
+                "WHERE LOWER(f.name) LIKE LOWER('%' || ? || '%') OR LOWER(dr.NAME) LIKE LOWER('%' || ? || '%') " +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT (l.user_id) DESC;";
+        return jdbcTemplate.query(sql, this::makeFilm, query, query);
     }
 
     @Override
