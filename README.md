@@ -2,7 +2,7 @@
 
 ### ER-диаграмма: 
 
-![](https://github.com/AlexandrValter/java-filmorate/raw/add-feed/DB%20for%20Filmorate.png?raw=true)
+![](https://github.com/AlexandrValter/java-filmorate/raw/develop/DB%20for%20Filmorate.png?raw=true)
 
 В проекте используется база данных H2. Таблицы mpa_rating и genres заполняются данными автоматически.  
 
