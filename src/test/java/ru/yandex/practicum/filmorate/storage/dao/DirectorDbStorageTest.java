@@ -167,7 +167,7 @@ public class DirectorDbStorageTest {
         filmDbService.addFilm(film1);
         filmDbService.addFilm(film2);
         filmDbService.addFilm(film3);
-        assertEquals(1,filmDbService.searchByTitleOrDirector("dir",
-                        List.of(ByEnum.director, ByEnum.title)).size(),"expected 1");
+        assertEquals(3,filmDbService.searchByTitleOrDirector("dir",
+                        List.of(ByEnum.director, ByEnum.title)).size(),"expected 3");
     }
 }
