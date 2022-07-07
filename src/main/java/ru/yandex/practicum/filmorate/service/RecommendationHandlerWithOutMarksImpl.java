@@ -14,13 +14,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Primary
-
 public class RecommendationHandlerWithOutMarksImpl implements RecommendationHandler {
     private final LikeDao likeDao;
 
     private final FilmService filmService;
 
-    public RecommendationHandlerWithOutMarksImpl(LikeDao likeDao, @Qualifier("FilmDbService") FilmService filmService) {
+    public RecommendationHandlerWithOutMarksImpl(LikeDao likeDao,
+                                                 @Qualifier("FilmDbService") FilmService filmService) {
         this.likeDao = likeDao;
         this.filmService = filmService;
     }

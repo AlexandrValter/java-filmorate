@@ -1,11 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -21,14 +19,13 @@ import java.util.Map;
 import java.util.Set;
 
 @Component("FilmDbStorage")
-@Primary
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
-    private final JdbcTemplate jdbcTemplate;    private final LikeDao likeDao;
+    private final JdbcTemplate jdbcTemplate;
+    private final LikeDao likeDao;
     private final MpaDao mpaDao;
     private final GenreDao genreDao;
     private final DirectorDao directorDao;
-
 
     @Override
     public Film addFilm(Film film) {
@@ -65,7 +62,6 @@ public class FilmDbStorage implements FilmStorage {
         String sqlDel = "DELETE FROM film_genre WHERE film_id = ?;" +
                 "DELETE FROM DIRECTORS_FILMS_LINK WHERE ID_FILM = ?;";
         jdbcTemplate.update(sqlDel, film.getId(), film.getId());
-
         return film;
     }
 
@@ -73,8 +69,8 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilm(int id) {
         String sql = "SELECT * FROM films WHERE id=?";
         return jdbcTemplate.query(sql, this::makeFilm, id).stream().findAny()
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,
-                String.format("Фильм с id %d не найден", id)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        String.format("Фильм с id %d не найден", id)));
     }
 
     @Override
@@ -194,9 +190,19 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Set<Film> getUserLikedFilms(int userId) {
         String sqlUserLiked = "SELECT * FROM FILMS WHERE ID IN(SELECT FILM_ID FROM LIKES WHERE USER_ID =?) ";
+        return Set.copyOf(jdbcTemplate.query(sqlUserLiked, this::makeFilm, userId));
+    }
 
-        return Set.copyOf(jdbcTemplate.query(sqlUserLiked, this::makeFilm,userId));
+    @Override
+    public void addLike(int filmId, int userId) {
+        String sql = "MERGE INTO likes KEY(film_id, user_id) VALUES (?, ?);";
+        jdbcTemplate.update(sql, filmId, userId);
+    }
 
+    @Override
+    public void deleteLike(int filmId, int userId) {
+        String sql = "DELETE FROM likes WHERE film_id = ? AND user_id = ?;";
+        jdbcTemplate.update(sql, filmId, userId);
     }
 
 

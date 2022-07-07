@@ -38,4 +38,8 @@ public interface FilmStorage {
     List<Film> searchByDirector(String query);
 
     List<Film> searchByTitleAndDirector(String query);
+
+    void addLike(int filmId, int userId);
+
+    void deleteLike(int filmId, int userId);
 }

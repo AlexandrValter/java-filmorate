@@ -16,10 +16,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-
 @Slf4j
 @Service
-public class InMemoryUserService implements UserService{
+public class InMemoryUserService implements UserService {
     private final UserStorage userStorage;
 
     @Autowired

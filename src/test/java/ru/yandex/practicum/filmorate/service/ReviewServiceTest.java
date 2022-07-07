@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.exception.NotFoundReviewException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.review.Review;
+import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.ReviewDbStorage;
 import ru.yandex.practicum.filmorate.storage.dao.UserDbStorage;
@@ -83,7 +83,7 @@ class ReviewServiceTest {
 
     @Test
     void addLikeForReview() {
-        assertThrows(NotFoundReviewException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
+        assertThrows(NotFoundException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
         addAllDataForTest();
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == 0);
         reviewServiceImpl.addLikeForReview(1, 1);
@@ -94,7 +94,7 @@ class ReviewServiceTest {
 
     @Test
     void addDislikeForReview() {
-        assertThrows(NotFoundReviewException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
+        assertThrows(NotFoundException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
         addAllDataForTest();
         assertTrue(reviewDbStorage.findReviewById(1).getUseful() == 0);
         reviewServiceImpl.addDislikeForReview(1, 1);
@@ -105,7 +105,7 @@ class ReviewServiceTest {
 
     @Test
     void deleteLikeForReview() {
-        assertThrows(NotFoundReviewException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
+        assertThrows(NotFoundException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
         addAllDataForTest();
         reviewServiceImpl.addLikeForReview(1, 1);
         reviewServiceImpl.addLikeForReview(1, 2);
@@ -116,7 +116,7 @@ class ReviewServiceTest {
 
     @Test
     void deleteDislikeForReview() {
-        assertThrows(NotFoundReviewException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
+        assertThrows(NotFoundException.class, () -> reviewServiceImpl.addLikeForReview(1, 1));
         addAllDataForTest();
         reviewServiceImpl.addDislikeForReview(1, 1);
         reviewServiceImpl.addDislikeForReview(1, 2);

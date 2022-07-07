@@ -5,10 +5,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationReviewException;
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Operation;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.review.Review;
+import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.List;
 @Service
 public class ReviewServiceImpl implements ReviewService {
     private final ReviewStorage reviewStorage;
-    private final ReviewDbService reviewDbService;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
     private final FeedDao feedDao;
@@ -25,12 +22,10 @@ public class ReviewServiceImpl implements ReviewService {
     private final static Integer DISLIKE = -1;
 
     public ReviewServiceImpl(ReviewStorage reviewStorage,
-                             ReviewDbService reviewDbService,
                              @Qualifier("UserDbStorage") UserStorage userStorage,
                              @Qualifier("FilmDbStorage") FilmStorage filmStorage,
                              FeedDao feedDao) {
         this.reviewStorage = reviewStorage;
-        this.reviewDbService = reviewDbService;
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
         this.feedDao = feedDao;
@@ -39,31 +34,31 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public List<Review> getAllReviewByIdFilm(Integer filmId, Integer count) {
         log.info("Запрошены {} отзывов на фильм id = {}", count, filmId);
-        return reviewDbService.getAllReviewByIdFilm(filmId, count);
+        return reviewStorage.getAllReviewByIdFilm(filmId, count);
     }
 
     @Override
     public void addLikeForReview(Integer id, Integer userId) {
         log.info("Пользователю id = {} понравился отзыв id = {}", userId, id);
-        reviewDbService.addLikeDislike(id, userId, LIKE);
+        reviewStorage.addLikeDislike(id, userId, LIKE);
     }
 
     @Override
     public void addDislikeForReview(Integer id, Integer userId) {
         log.info("Пользователю id = {} не понравился отзыв id = {}", userId, id);
-        reviewDbService.addLikeDislike(id, userId, DISLIKE);
+        reviewStorage.addLikeDislike(id, userId, DISLIKE);
     }
 
     @Override
     public void deleteLikeForReview(Integer id, Integer userId) {
         log.info("Пользователь id = {} удалил лайк с отзыва id = {}", userId, id);
-        reviewDbService.deleteLikeDislike(id, userId, DISLIKE);
+        reviewStorage.deleteLikeDislike(id, userId, DISLIKE);
     }
 
     @Override
     public void deleteDislikeForReview(Integer id, Integer userId) {
         log.info("Пользователь id = {} удалил дизлайк с отзыва id = {}", userId, id);
-        reviewDbService.deleteLikeDislike(id, userId, LIKE);
+        reviewStorage.deleteLikeDislike(id, userId, LIKE);
     }
 
     @Override
@@ -74,8 +69,8 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review addReview(Review review) {
-        if (filmStorage.getFilm(review.getFilmId()) instanceof Film &&
-                userStorage.getUser(review.getUserId()) instanceof User) {
+        if (filmStorage.getFilm(review.getFilmId()) != null &&
+                userStorage.getUser(review.getUserId()) != null) {
             Review newReview = reviewStorage.addReview(review);
             log.info("Добавлен отзыв id = {}", review.getId());
             feedDao.addFeed(newReview.getUserId(), Event.REVIEW, Operation.ADD, newReview.getId());

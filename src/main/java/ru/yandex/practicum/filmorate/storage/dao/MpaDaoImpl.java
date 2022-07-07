@@ -44,6 +44,7 @@ public class MpaDaoImpl implements MpaDao {
             );
         }
     }
+
     @Override
     public Mpa getFilmMpa ( int id){
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(

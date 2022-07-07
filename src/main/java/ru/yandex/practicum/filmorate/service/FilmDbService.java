@@ -1,11 +1,9 @@
-package ru.yandex.practicum.filmorate.service.dao;
+package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.*;
@@ -14,7 +12,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service("FilmDbService")
 public class FilmDbService implements FilmService {
-    private final JdbcTemplate jdbcTemplate;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final GenreDao genreDao;
@@ -22,14 +19,12 @@ public class FilmDbService implements FilmService {
     private final FeedDao feedDao;
     private final DirectorDao directorDao;
 
-    public FilmDbService(JdbcTemplate jdbcTemplate,
-                         @Qualifier("FilmDbStorage") FilmStorage filmStorage,
+    public FilmDbService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
                          @Qualifier("UserDbStorage") UserStorage userStorage,
                          GenreDao genreDao,
                          MpaDao mpaDao,
                          FeedDao feedDao,
                          DirectorDao directorDao) {
-        this.jdbcTemplate = jdbcTemplate;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreDao = genreDao;
@@ -41,8 +36,8 @@ public class FilmDbService implements FilmService {
     @Override
     public Film addFilm(Film film) {
         filmStorage.addFilm(film);
-        fillingGenres(film);
-        fillingDirectors(film);
+        genreDao.fillingGenres(film);
+        directorDao.fillingDirectors(film);
         log.info("В базу добавлен новый фильм id = {}", film.getId());
         return film;
     }
@@ -50,10 +45,18 @@ public class FilmDbService implements FilmService {
     @Override
     public void addLike(int filmId, int userId) {
         if (filmStorage.getFilm(filmId) != null && userStorage.getUser(userId) != null) {
-            String sql = "MERGE INTO likes KEY(film_id, user_id) VALUES (?, ?);";
-            jdbcTemplate.update(sql, filmId, userId);
+            filmStorage.addLike(filmId, userId);
             feedDao.addFeed(userId, Event.LIKE, Operation.ADD, filmId);
             log.info("Пользователь id={} поставил лайк фильму id={}", userId, filmId);
+        }
+    }
+
+    @Override
+    public void deleteLike(int filmId, int userId) {
+        if (filmStorage.getFilm(filmId) != null && userStorage.getUser(userId) != null) {
+            feedDao.addFeed(userId, Event.LIKE, Operation.REMOVE, filmId);
+            filmStorage.deleteLike(filmId, userId);
+            log.info("Пользователь id={} удалил лайк с фильма id={}", userId, filmId);
         }
     }
 
@@ -61,23 +64,12 @@ public class FilmDbService implements FilmService {
     public Film addOrUpdateFilm(Film film) {
         if (film.getId() != null && getFilm(film.getId()) != null) {
             filmStorage.addOrUpdateFilm(film);
-            fillingGenres(film);
-            fillingDirectors(film);
+            genreDao.fillingGenres(film);
+            directorDao.fillingDirectors(film);
             log.info("Обновлена информация о фильме id = {}", film.getId());
             return film;
         } else {
-            addFilm(film);
-        }
-        return null;
-    }
-
-    @Override
-    public void deleteLike(int filmId, int userId) {
-        if (filmStorage.getFilm(filmId) != null && userStorage.getUser(userId) != null) {
-            String sql = "DELETE FROM likes WHERE film_id = ? AND user_id = ?;";
-            jdbcTemplate.update(sql, filmId, userId);
-            feedDao.addFeed(userId, Event.LIKE, Operation.REMOVE, filmId);
-            log.info("Пользователь id={} удалил лайк с фильма id={}", userId, filmId);
+            return addFilm(film);
         }
     }
 
@@ -91,7 +83,6 @@ public class FilmDbService implements FilmService {
     @Override
     public Collection<Film> getAllFilms() {
         return filmStorage.getAllFilms();
-
     }
 
     @Override
@@ -99,7 +90,6 @@ public class FilmDbService implements FilmService {
         if (genreId == -1) {
             if (year == -1) {
                 List<Film> films = filmStorage.getPopularFilms(count);
-
                 log.info("Запрошен список популярных фильмов, количество запрошенных фильмов = {}", count);
                 return films;
             } else {
@@ -117,14 +107,14 @@ public class FilmDbService implements FilmService {
             }
             List<Film> films = filmStorage.getPopularFilmsByGenreAndYear(count, genreId, year);
             log.info("Запрошен список популярных фильмов с жанром id = {}, годом релиза = {}, " +
-                            "количество запрошенных фильмов = {}", genreId, year, count);
+                    "количество запрошенных фильмов = {}", genreId, year, count);
             return films;
         }
     }
 
     @Override
     public List<Film> filmByDirector(Integer idDirector, String param) {
-        if(directorDao.getDirector(idDirector) != null) {
+        if (directorDao.getDirector(idDirector) != null) {
             List<Film> films = filmStorage.getFilmsByDirector(idDirector, param);
             log.info("Запрошены фильмы режиссера id={}", idDirector);
             return films;
@@ -196,31 +186,9 @@ public class FilmDbService implements FilmService {
         Collections.sort(commonList, new Comparator<Film>() {
             @Override
             public int compare(Film o1, Film o2) {
-                return o1.getRate()-o2.getRate();
+                return o1.getRate() - o2.getRate();
             }
         });
         return commonList;
-    }
-
-
-
-
-    private void fillingGenres(Film film) {
-        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
-            for (Genre genre : film.getGenres()) {
-                String sql = "MERGE INTO film_genre (film_id, genre_id) KEY (film_id, genre_id) VALUES (?, ?);";
-                jdbcTemplate.update(sql, film.getId(), genre.getId());
-            }
-        }
-    }
-
-    private void fillingDirectors(Film film) {
-        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
-            for (Director director : film.getDirectors()) {
-                String sql = "MERGE INTO DIRECTORS_FILMS_LINK(ID_DIRECTOR, ID_FILM) "
-                        + "KEY (ID_DIRECTOR,ID_FILM) VALUES ( ?,? )";
-                jdbcTemplate.update(sql, director.getId(), film.getId());
-            }
-        }
     }
 }

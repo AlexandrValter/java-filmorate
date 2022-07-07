@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Set;
 
 public interface LikeDao {
-  Collection<Like> getAllLikes();
-  Set<Integer> getFilmLikes(int filmId);
+    Collection<Like> getAllLikes();
+
+    Set<Integer> getFilmLikes(int filmId);
 }

@@ -16,13 +16,11 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class InMemoryFilmService implements FilmService{
-
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 

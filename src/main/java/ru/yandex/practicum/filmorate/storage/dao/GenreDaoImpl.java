@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreDao;
 
@@ -44,6 +45,7 @@ public class GenreDaoImpl implements GenreDao {
             );
         }
     }
+
     @Override
     public TreeSet<Genre> getFilmGenres(int id) {
         String sql = "SELECT fg.genre_id, g.name " +
@@ -56,6 +58,16 @@ public class GenreDaoImpl implements GenreDao {
             return new TreeSet<>(genres);
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public void fillingGenres(Film film) {
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            for (Genre genre : film.getGenres()) {
+                String sql = "MERGE INTO film_genre (film_id, genre_id) KEY (film_id, genre_id) VALUES (?, ?);";
+                jdbcTemplate.update(sql, film.getId(), genre.getId());
+            }
         }
     }
 }

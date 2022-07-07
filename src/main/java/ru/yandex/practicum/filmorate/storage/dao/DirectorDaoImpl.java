@@ -1,21 +1,19 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.DirectorDao;
 
-import javax.xml.bind.ValidationException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Component
-@Slf4j
 public class DirectorDaoImpl implements DirectorDao {
     private final JdbcTemplate jdbcTemplate;
 
@@ -25,13 +23,10 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public Director getDirector(Integer id) {
-        if (id == null || id <= 0) {
-            throw new NotFoundException("id должен быть > 0");
-        }
         String sql = "SELECT * FROM DIRECTORS WHERE ID_DIRECTOR=?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, id);
         if (rowSet.next()) {
-            Director director = new Director(id,rowSet.getString("NAME"));
+            Director director = new Director(id, rowSet.getString("NAME"));
             return director;
         } else {
             throw new NotFoundException("director not found");
@@ -44,7 +39,9 @@ public class DirectorDaoImpl implements DirectorDao {
         String sql = "SELECT * FROM DIRECTORS";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql);
         while (rowSet.next()) {
-            Director director = new Director(rowSet.getInt("ID_DIRECTOR"),rowSet.getString("NAME"));
+            Director director = new Director(
+                    rowSet.getInt("ID_DIRECTOR"),
+                    rowSet.getString("NAME"));
             directorList.add(director);
         }
         return directorList;
@@ -52,13 +49,6 @@ public class DirectorDaoImpl implements DirectorDao {
 
     @Override
     public Director addDirector(Director director) {
-        if(director.getName().equals(" ")||director.getName().equals("") || director.getName().equals(null)){
-            try {
-                throw new ValidationException("неправильный формат имени");
-            } catch (ValidationException e) {
-                throw new RuntimeException(e);
-            }
-        }
         String sql = "INSERT INTO DIRECTORS(NAME) VALUES ( ? )";
         jdbcTemplate.update(sql, director.getName());
         sql = "SELECT MAX(ID_DIRECTOR) max FROM DIRECTORS";
@@ -66,15 +56,14 @@ public class DirectorDaoImpl implements DirectorDao {
         if (maxId.next()) {
             director.setId(maxId.getInt("max"));
         }
-        log.info("добавлен режиссер id={}",director.getId());
         return director;
     }
 
     @Override
     public Director updateDirector(Director director) {
         SqlRowSet testId = jdbcTemplate.queryForRowSet("SELECT ID_DIRECTOR FROM DIRECTORS WHERE ID_DIRECTOR=?"
-                ,director.getId());
-        if(testId.next()) {
+                , director.getId());
+        if (testId.next()) {
             String sql = "UPDATE DIRECTORS SET NAME=? WHERE ID_DIRECTOR=?";
             jdbcTemplate.update(sql, director.getName(), director.getId());
             return director;
@@ -88,15 +77,27 @@ public class DirectorDaoImpl implements DirectorDao {
         String sql = "DELETE FROM DIRECTORS WHERE ID_DIRECTOR=?";
         jdbcTemplate.update(sql, id);
     }
+
     @Override
-    public Set<Director> getFilmDirector(Integer id){
+    public Set<Director> getFilmDirector(Integer id) {
         String sql = "SELECT DFL.ID_DIRECTOR id_dir,D.NAME name FROM DIRECTORS_FILMS_LINK DFL "
-                +"LEFT JOIN DIRECTORS D on D.ID_DIRECTOR = DFL.ID_DIRECTOR "
+                + "LEFT JOIN DIRECTORS D on D.ID_DIRECTOR = DFL.ID_DIRECTOR "
                 + "WHERE  DFL.ID_FILM=?";
-        List<Director> directors = jdbcTemplate.query(sql,(rs, rowNum) ->
-                new Director(rs.getInt("id_dir"),rs.getString("name")),id);
-        if(!directors.isEmpty()) {
+        List<Director> directors = jdbcTemplate.query(sql, (rs, rowNum) ->
+                new Director(rs.getInt("id_dir"), rs.getString("name")), id);
+        if (!directors.isEmpty()) {
             return new HashSet<>(directors);
         } else return new HashSet<>();
+    }
+
+    @Override
+    public void fillingDirectors(Film film) {
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            for (Director director : film.getDirectors()) {
+                String sql = "MERGE INTO DIRECTORS_FILMS_LINK(ID_DIRECTOR, ID_FILM) "
+                        + "KEY (ID_DIRECTOR,ID_FILM) VALUES ( ?,? )";
+                jdbcTemplate.update(sql, director.getId(), film.getId());
+            }
+        }
     }
 }

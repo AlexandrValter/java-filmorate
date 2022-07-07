@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundReviewException;
-import ru.yandex.practicum.filmorate.model.review.Review;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,36 +18,25 @@ import java.util.stream.Collectors;
 
 @Component
 public class ReviewDbStorage implements ReviewStorage {
+    private final UserStorage userStorage;
     private final JdbcTemplate jdbcTemplate;
-    private final FilmDbStorage filmDbStorage;
-    private final UserDbStorage userDbStorage;
     private final static int NEW_USEFUL = 0;
 
-    public ReviewDbStorage(JdbcTemplate jdbcTemplate, FilmDbStorage filmDbStorage, UserDbStorage userDbStorage) {
+    public ReviewDbStorage(@Qualifier("UserDbStorage") UserStorage userStorage,
+                           JdbcTemplate jdbcTemplate) {
+        this.userStorage = userStorage;
         this.jdbcTemplate = jdbcTemplate;
-        this.filmDbStorage = filmDbStorage;
-        this.userDbStorage = userDbStorage;
     }
 
     @Override
     public List<Review> getAllReview() {
         String sql = "SELECT * FROM reviews";
-        return jdbcTemplate.query(sql, ((rs, rowNum) -> getReview(rs, rowNum))).stream()
+        return jdbcTemplate.query(sql, (this::getReview)).stream()
                 .sorted((o1, o2) -> {
-                    int result = Integer.valueOf(o1.getUseful()).compareTo(Integer.valueOf(o2.getUseful()));
+                    int result = o1.getUseful().compareTo(o2.getUseful());
                     return result * -1;
                 })
                 .collect(Collectors.toList());
-    }
-
-    public static Review getReview(ResultSet rs, int rowNum) throws SQLException {
-        Review review = new Review(rs.getString("content"),
-                rs.getBoolean("is_positive"),
-                rs.getInt("user_id"),
-                rs.getInt("film_id"));
-        review.setId(rs.getInt("id_review"));
-        review.setUseful(rs.getInt("useful"));
-        return review;
     }
 
     @Override
@@ -96,7 +87,63 @@ public class ReviewDbStorage implements ReviewStorage {
             review.setUseful(rowSet.getInt("useful"));
             return review;
         } else {
-            throw new NotFoundReviewException("Review с id " + id + " не найден");
+            throw new NotFoundException("Review с id " + id + " не найден");
         }
+    }
+
+    @Override
+    public List<Review> getAllReviewByIdFilm(Integer filmId, Integer count) {
+        String sql = "SELECT * FROM reviews WHERE film_id = ?";
+        return jdbcTemplate.query(sql, (this::getReview), filmId).stream()
+                .sorted((o1, o2) -> {
+                    int result = o1.getUseful().compareTo(o2.getUseful());
+                    return result * -1;
+                })
+                .limit(count)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void addLikeDislike(Integer id, Integer userId, Integer value) {
+        if (findReviewById(id) != null && userStorage.getUser(userId) != null) {
+            String sqlQuery = "SELECT * FROM reviews_ratings WHERE user_id = ? AND id_review = ?";
+            SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sqlQuery, userId, id);
+            if (rowSet.next()) {
+                String sqlUpdate = "UPDATE reviews_ratings SET rate = ? WHERE user_id = ? AND id_review = ?";
+                jdbcTemplate.update(sqlUpdate, value, userId, id);
+            } else {
+                String sql = "INSERT INTO reviews_ratings (id_review, user_id, rate) VALUES (?,?,?)";
+                jdbcTemplate.update(sql, id, userId, value);
+            }
+            changeUseful(id, value);
+        } else {
+            throw new NotFoundException("Отсутствует пользователь или отзыв");
+        }
+    }
+
+    @Override
+    public void deleteLikeDislike(Integer id, Integer userId, Integer value) {
+        if (findReviewById(id) != null && userStorage.getUser(userId) != null) {
+            changeUseful(id, value);
+            String sql = "DELETE FROM reviews_ratings WHERE user_id = ? AND id_review = ?";
+            jdbcTemplate.update(sql, userId, id);
+        } else {
+            throw new NotFoundException("Отсутствует пользователь или отзыв");
+        }
+    }
+
+    private void changeUseful(Integer id, Integer num) {
+        String sql = "UPDATE reviews SET useful = useful + ? WHERE id_review = ?";
+        jdbcTemplate.update(sql, num, id);
+    }
+
+    private Review getReview(ResultSet rs, int rowNum) throws SQLException {
+        Review review = new Review(rs.getString("content"),
+                rs.getBoolean("is_positive"),
+                rs.getInt("user_id"),
+                rs.getInt("film_id"));
+        review.setId(rs.getInt("id_review"));
+        review.setUseful(rs.getInt("useful"));
+        return review;
     }
 }
