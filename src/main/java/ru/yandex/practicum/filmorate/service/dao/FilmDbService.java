@@ -179,7 +179,7 @@ public class FilmDbService implements FilmService {
         if (by.contains(ByEnum.title) && !by.contains(ByEnum.director)) {
             log.info("Запрошен поиск по тексту {} среди названий фильмов", query);
             return filmStorage.searchByTitle(query);
-        } else if (by.contains(ByEnum.director) && !by.contains(ByEnum.director)) {
+        } else if (by.contains(ByEnum.director) && !by.contains(ByEnum.title)) {
             log.info("Запрошен поиск по тексту {} среди режиссеров фильмов", query);
             return filmStorage.searchByDirector(query);
         } else if (by.contains(ByEnum.title) && by.contains(ByEnum.director)) {
