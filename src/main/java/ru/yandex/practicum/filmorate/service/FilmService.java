@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import ru.yandex.practicum.filmorate.model.ByEnum;
+import ru.yandex.practicum.filmorate.model.SearchBy;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -38,5 +38,5 @@ public interface FilmService {
 
     List<Film> findCommonFilms(int userId, int friendId);
 
-    List<Film> searchByTitleOrDirector(String query, List<ByEnum> by);
+    List<Film> searchByTitleOrDirector(String query, List<SearchBy> by);
 }

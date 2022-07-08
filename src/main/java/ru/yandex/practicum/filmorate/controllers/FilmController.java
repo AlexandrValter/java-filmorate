@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.ByEnum;
+import ru.yandex.practicum.filmorate.model.SearchBy;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -76,7 +76,7 @@ public class FilmController {
     @GetMapping("/search")
     public List<Film> searchByNameFilmAndDirector(@RequestParam String query,
                                                   @RequestParam(required = false, name = "by")
-                                                  List<ByEnum> by) {
+                                                  List<SearchBy> by) {
         return filmService.searchByTitleOrDirector(query, by);
     }
 }

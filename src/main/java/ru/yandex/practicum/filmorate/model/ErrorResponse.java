@@ -1,13 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
 public class ErrorResponse {
-    private final String textException;
+    private final String error;
 
-    public ErrorResponse(String textException) {
-        this.textException = textException;
+    public ErrorResponse(String error) {
+        this.error = error;
     }
 
     public String getTextException() {
-        return textException;
+        return error;
     }
 }

@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class Like {
-    int filmId;
-    int userId;
+    private final int filmId;
+    private final int userId;
 
     public Like(int userId, int filmId) {
         this.userId= userId;

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import ru.yandex.practicum.filmorate.model.ByEnum;
+import ru.yandex.practicum.filmorate.model.SearchBy;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -122,7 +122,7 @@ public class DirectorServiceTest {
         filmDbService.addFilm(film1);
         filmDbService.addFilm(film2);
         filmDbService.addFilm(film3);
-        assertEquals(2, filmDbService.searchByTitleOrDirector("film", List.of(ByEnum.title)).size(),
+        assertEquals(2, filmDbService.searchByTitleOrDirector("film", List.of(SearchBy.title)).size(),
                 "expected 2");
     }
 
@@ -144,7 +144,7 @@ public class DirectorServiceTest {
         filmDbService.addFilm(film1);
         filmDbService.addFilm(film2);
         filmDbService.addFilm(film3);
-        assertEquals(3, filmDbService.searchByTitleOrDirector("Dir", List.of(ByEnum.director)).size(),
+        assertEquals(3, filmDbService.searchByTitleOrDirector("Dir", List.of(SearchBy.director)).size(),
                 "expected 3");
     }
 
@@ -167,6 +167,6 @@ public class DirectorServiceTest {
         filmDbService.addFilm(film2);
         filmDbService.addFilm(film3);
         assertEquals(3, filmDbService.searchByTitleOrDirector("dir",
-                List.of(ByEnum.director, ByEnum.title)).size(), "expected 3");
+                List.of(SearchBy.director, SearchBy.title)).size(), "expected 3");
     }
 }
