@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import ru.yandex.practicum.filmorate.model.SearchBy;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -13,7 +14,7 @@ public interface FilmService {
 
     void deleteLike(int filmId, int userId);
 
-    List<Film> popularFilms(int count);
+    List<Film> popularFilms(int count, int genreId, int year);
 
     Film addFilm(Film film);
 
@@ -23,6 +24,8 @@ public interface FilmService {
 
     Collection<Film> getAllFilms();
 
+    List<Film> filmByDirector(Integer idDirector, String param);
+
     List<Genre> getAllGenres();
 
     Genre getGenre(int id);
@@ -30,4 +33,10 @@ public interface FilmService {
     List<Mpa> getAllMpa();
 
     Mpa getMpa(int id);
+
+    void deleteFilm(int filmId);
+
+    List<Film> findCommonFilms(int userId, int friendId);
+
+    List<Film> searchByTitleOrDirector(String query, List<SearchBy> by);
 }

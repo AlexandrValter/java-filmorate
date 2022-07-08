@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -38,6 +35,61 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilms(int count) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public void deleteFilm(int filmId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public Set<Film> getUserLikedFilms(int userId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByYear(int count, int year) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByGenre(int count, int genreId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> getFilmsByDirector(Integer idDirector, String param) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> searchByTitle(String query) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> searchByTitleAndDirector(String query) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public void addLike(int filmId, int userId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public void deleteLike(int filmId, int userId) {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 

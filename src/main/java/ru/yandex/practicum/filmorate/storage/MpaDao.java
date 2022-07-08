@@ -9,4 +9,6 @@ public interface MpaDao {
     List<Mpa> getAllMpa();
 
     Mpa getMpa(int id);
+
+    Mpa getFilmMpa(int id);
 }

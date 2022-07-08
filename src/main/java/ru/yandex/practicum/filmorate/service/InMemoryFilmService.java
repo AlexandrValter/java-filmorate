@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.SearchBy;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -20,7 +21,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class InMemoryFilmService implements FilmService{
-
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
@@ -63,7 +63,7 @@ public class InMemoryFilmService implements FilmService{
         }
     }
 
-    public List<Film> popularFilms(int count) {
+    public List<Film> popularFilms(int count, int genreId, int year) {
         return filmStorage.getAllFilms().stream()
                 .sorted(Comparator.comparingInt(Film::getRate).reversed())
                 .distinct()
@@ -92,6 +92,11 @@ public class InMemoryFilmService implements FilmService{
     }
 
     @Override
+    public List<Film> filmByDirector(Integer idDirector, String param) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
     public List<Genre> getAllGenres() {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -108,6 +113,21 @@ public class InMemoryFilmService implements FilmService{
 
     @Override
     public Mpa getMpa(int id) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public void deleteFilm(int filmId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> findCommonFilms(int userId, int friendId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Film> searchByTitleOrDirector(String query, List<SearchBy> by) {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }
